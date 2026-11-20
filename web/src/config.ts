@@ -56,3 +56,19 @@ export const BASEMAPS: Basemap[] = [
   { id: 'ortofoto', label: 'Ortofoto', layers: ['maaamet-foto'] },
   { id: 'hybriid', label: 'Hübriid', layers: ['maaamet-foto', 'maaamet-hybriid'] },
 ]
+
+export const LOGO = {
+  src: '/logo.png',
+  href: 'https://corle.ee/',
+  alt: 'Corle OÜ',
+}
+
+// IN-ADS usage rules 2.4.1 and 2.4.2: min 4 chars, 500 ms pause.
+export const ADDRESS_SEARCH = {
+  url: 'https://inaadress.maaamet.ee/inaadress/gazetteer',
+  minLength: 4,
+  debounceMs: 500,
+  resultLimit: 8,
+  maxZoom: 18,
+  extentHighlightMs: 2500,
+}

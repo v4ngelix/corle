@@ -20,7 +20,7 @@ const layers: LayerSpecification[] = TILE_LAYERS.map(({ id }) => ({
   layout: { visibility: BASEMAPS[0].layers.includes(id) ? 'visible' : 'none' },
 }))
 
-export function MapView() {
+export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => void }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -33,8 +33,12 @@ export function MapView() {
       style: { version: 8, sources, layers },
     })
     map.addControl(new BasemapControl(BASEMAPS), 'top-right')
-    return () => map.remove()
-  }, [])
+    onReady(map)
+    return () => {
+      onReady(null)
+      map.remove()
+    }
+  }, [onReady])
 
   return <div ref={containerRef} className="map" />
 }
