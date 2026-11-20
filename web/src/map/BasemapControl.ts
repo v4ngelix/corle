@@ -40,8 +40,9 @@ export class BasemapControl implements IControl {
   }
 
   private select(map: MapLibreMap, id: string): void {
-    for (const basemap of this.basemaps) {
-      map.setLayoutProperty(basemap.id, 'visibility', basemap.id === id ? 'visible' : 'none')
+    const visible = new Set(this.basemaps.find((b) => b.id === id)?.layers)
+    for (const layerId of new Set(this.basemaps.flatMap((b) => b.layers))) {
+      map.setLayoutProperty(layerId, 'visibility', visible.has(layerId) ? 'visible' : 'none')
     }
   }
 }

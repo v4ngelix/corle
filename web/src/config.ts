@@ -1,5 +1,3 @@
-// All external addresses live here (PLAN.md risk 9.2).
-
 export const START_VIEW = {
   center: [25.5, 58.7] as [number, number],
   zoom: 7,
@@ -12,30 +10,49 @@ export const MAX_BOUNDS: [[number, number], [number, number]] = [
   [28.5, 59.9],
 ]
 
-export interface Basemap {
+export interface TileLayer {
   id: string
-  label: string
   tiles: string[]
   scheme: 'xyz' | 'tms'
   maxzoom: number
   attribution: string
 }
 
-export const BASEMAPS: Basemap[] = [
+const MAAAMET_TMS = 'https://tiles.maaamet.ee/tm/tms/1.0.0'
+const MAAAMET_ATTRIBUTION = '© Maa- ja Ruumiamet'
+
+export const TILE_LAYERS: TileLayer[] = [
   {
     id: 'maaamet-kaart',
-    label: 'Kaart',
-    tiles: ['https://tiles.maaamet.ee/tm/tms/1.0.0/kaart@GMC/{z}/{x}/{y}.png'],
+    tiles: [`${MAAAMET_TMS}/kaart@GMC/{z}/{x}/{y}.png`],
     scheme: 'tms',
     maxzoom: 18,
-    attribution: '© Maa- ja Ruumiamet',
+    attribution: MAAAMET_ATTRIBUTION,
   },
   {
     id: 'maaamet-foto',
-    label: 'Foto',
-    tiles: ['https://tiles.maaamet.ee/tm/tms/1.0.0/foto@GMC/{z}/{x}/{y}.jpg'],
+    tiles: [`${MAAAMET_TMS}/foto@GMC/{z}/{x}/{y}.jpg`],
     scheme: 'tms',
     maxzoom: 18,
-    attribution: '© Maa- ja Ruumiamet',
+    attribution: MAAAMET_ATTRIBUTION,
   },
+  {
+    id: 'maaamet-hybriid',
+    tiles: [`${MAAAMET_TMS}/hybriid@GMC/{z}/{x}/{y}.png`],
+    scheme: 'tms',
+    maxzoom: 18,
+    attribution: MAAAMET_ATTRIBUTION,
+  },
+]
+
+export interface Basemap {
+  id: string
+  label: string
+  layers: string[]
+}
+
+export const BASEMAPS: Basemap[] = [
+  { id: 'kaart', label: 'Kaart', layers: ['maaamet-kaart'] },
+  { id: 'ortofoto', label: 'Ortofoto', layers: ['maaamet-foto'] },
+  { id: 'hybriid', label: 'Hübriid', layers: ['maaamet-foto', 'maaamet-hybriid'] },
 ]

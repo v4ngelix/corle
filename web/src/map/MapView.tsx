@@ -3,21 +3,21 @@ import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
 import './worker'
-import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, START_VIEW } from '../config'
+import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, START_VIEW, TILE_LAYERS } from '../config'
 import { BasemapControl } from './BasemapControl'
 
 const sources: Record<string, SourceSpecification> = Object.fromEntries(
-  BASEMAPS.map(({ id, tiles, scheme, maxzoom, attribution }) => [
+  TILE_LAYERS.map(({ id, tiles, scheme, maxzoom, attribution }) => [
     id,
     { type: 'raster', tileSize: 256, tiles, scheme, maxzoom, attribution },
   ]),
 )
 
-const layers: LayerSpecification[] = BASEMAPS.map(({ id }, i) => ({
+const layers: LayerSpecification[] = TILE_LAYERS.map(({ id }) => ({
   id,
   type: 'raster',
   source: id,
-  layout: { visibility: i === 0 ? 'visible' : 'none' },
+  layout: { visibility: BASEMAPS[0].layers.includes(id) ? 'visible' : 'none' },
 }))
 
 export function MapView() {
