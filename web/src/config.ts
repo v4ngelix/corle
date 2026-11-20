@@ -71,7 +71,6 @@ export interface WmsOverlay {
   attribution: string
 }
 
-// Draw order: first entry is drawn lowest.
 export const OVERLAYS: WmsOverlay[] = [
   {
     id: 'ky-omandivorm',
@@ -114,7 +113,6 @@ export const LOGO = {
   alt: 'Corle OÜ',
 }
 
-// IN-ADS usage rules 2.4.1 and 2.4.2: min 4 chars, 500 ms pause.
 export const ADDRESS_SEARCH = {
   url: 'https://inaadress.maaamet.ee/inaadress/gazetteer',
   minLength: 4,

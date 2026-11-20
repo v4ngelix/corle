@@ -39,7 +39,6 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
       maxZoom: MAX_ZOOM,
       maxBounds: MAX_BOUNDS,
       style: { version: 8, sources, layers },
-      // Non-tiled WMS images need a north-up map.
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,

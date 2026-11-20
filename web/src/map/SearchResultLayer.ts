@@ -5,7 +5,6 @@ import type { AddressSuggestion } from '../components/addressSearchApi'
 
 const EXTENT_ID = 'search-extent'
 
-// Marker + short-lived extent outline for the selected address.
 export class SearchResultLayer {
   private readonly map: MapLibreMap
   private marker: Marker | null = null

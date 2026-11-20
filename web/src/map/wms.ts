@@ -16,7 +16,6 @@ function getMapUrl(overlay: WmsOverlay, bbox: string, width: number, height: num
     WIDTH: String(width),
     HEIGHT: String(height),
   })
-  // BBOX last and unescaped: MapLibre replaces the {bbox-epsg-3857} placeholder literally.
   return `${overlay.url}?${params}&BBOX=${bbox}`
 }
 
@@ -35,7 +34,6 @@ export function wmsSource(overlay: WmsOverlay): SourceSpecification {
       attribution: overlay.attribution,
     }
   }
-  // Empty until WmsImageUpdater sets the first image.
   const [[west, south], [east, north]] = MAX_BOUNDS
   return {
     type: 'image',
@@ -68,7 +66,6 @@ export class WmsImageUpdater {
   constructor(map: MapLibreMap, overlay: WmsOverlay) {
     this.map = map
     this.overlay = overlay
-    // idle also fires after a visibility change; the URL check stops reload loops.
     map.on('moveend', this.update)
     map.on('idle', this.update)
   }

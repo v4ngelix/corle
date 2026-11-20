@@ -3,7 +3,6 @@ import { ADDRESS_SEARCH } from '../config'
 export interface AddressSuggestion {
   label: string
   lngLat: [number, number]
-  // Building/parcel outline as [lng, lat] pairs, when IN-ADS returns one.
   extent: [number, number][] | null
 }
 

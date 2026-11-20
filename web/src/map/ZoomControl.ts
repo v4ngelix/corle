@@ -2,8 +2,6 @@ import { NavigationControl } from 'maplibre-gl'
 
 const EPSILON = 1e-6
 
-// MapLibre disables the buttons only when zoom === min/max. The min zoom forced by maxBounds
-// differs from the reached zoom by float noise, so "−" never got disabled.
 export class ZoomControl extends NavigationControl {
   constructor() {
     super({ showCompass: false })

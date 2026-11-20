@@ -80,7 +80,6 @@ export class LayerControl implements IControl {
     return fieldset
   }
 
-  // "Kihid" switches all layers and shows a partial state when only some are on.
   private overlayFieldset(map: MapLibreMap): HTMLElement {
     const fieldset = document.createElement('fieldset')
     fieldset.className = 'overlay-tree'
