@@ -1,5 +1,5 @@
 import type { IControl, Map as MapLibreMap } from 'maplibre-gl'
-import type { Basemap } from '../config'
+import type { Basemap, WmsOverlay } from '../config'
 
 const LAYERS_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true">' +
@@ -10,13 +10,15 @@ const LAYERS_ICON =
 
 export class LayerControl implements IControl {
   private readonly basemaps: Basemap[]
+  private readonly overlays: WmsOverlay[]
   private container?: HTMLElement
   private button?: HTMLButtonElement
   private panel?: HTMLElement
   private open = false
 
-  constructor(basemaps: Basemap[]) {
+  constructor(basemaps: Basemap[], overlays: WmsOverlay[]) {
     this.basemaps = basemaps
+    this.overlays = overlays
   }
 
   onAdd(map: MapLibreMap): HTMLElement {
@@ -35,7 +37,7 @@ export class LayerControl implements IControl {
     const panel = document.createElement('div')
     panel.id = 'layer-panel'
     panel.className = 'layer-panel'
-    panel.append(this.basemapFieldset(map))
+    panel.append(this.basemapFieldset(map), this.overlayFieldset(map))
 
     container.append(button, panel)
     this.container = container
@@ -78,6 +80,43 @@ export class LayerControl implements IControl {
     return fieldset
   }
 
+  // "Kihid" switches all layers and shows a partial state when only some are on.
+  private overlayFieldset(map: MapLibreMap): HTMLElement {
+    const fieldset = document.createElement('fieldset')
+    fieldset.className = 'overlay-tree'
+
+    const root = checkbox('Kihid')
+    root.label.classList.add('overlay-root')
+    const list = document.createElement('div')
+    list.className = 'overlay-list'
+    fieldset.append(root.label, list)
+
+    const setLayer = (input: HTMLInputElement, checked: boolean): void => {
+      input.checked = checked
+      map.setLayoutProperty(input.value, 'visibility', checked ? 'visible' : 'none')
+    }
+
+    const inputs = this.overlays.map((overlay) => {
+      const { label, input } = checkbox(overlay.label)
+      input.value = overlay.id
+      input.checked = overlay.visible
+      input.addEventListener('change', () => {
+        setLayer(input, input.checked)
+        setTriState(root.input, inputs)
+      })
+      list.append(label)
+      return input
+    })
+
+    root.input.addEventListener('change', () => {
+      inputs.forEach((c) => setLayer(c, root.input.checked))
+      setTriState(root.input, inputs)
+    })
+
+    setTriState(root.input, inputs)
+    return fieldset
+  }
+
   private setOpen(open: boolean): void {
     this.open = open
     this.panel!.hidden = !open
@@ -101,4 +140,18 @@ export class LayerControl implements IControl {
       map.setLayoutProperty(layerId, 'visibility', visible.has(layerId) ? 'visible' : 'none')
     }
   }
+}
+
+function checkbox(text: string): { label: HTMLLabelElement; input: HTMLInputElement } {
+  const input = document.createElement('input')
+  input.type = 'checkbox'
+  const label = document.createElement('label')
+  label.append(input, text)
+  return { label, input }
+}
+
+function setTriState(parent: HTMLInputElement, children: HTMLInputElement[]): void {
+  const on = children.filter((c) => c.checked).length
+  parent.checked = on > 0 && on === children.length
+  parent.indeterminate = on > 0 && on < children.length
 }

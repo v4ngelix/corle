@@ -57,6 +57,57 @@ export const BASEMAPS: Basemap[] = [
   { id: 'hybriid', label: 'Hübriid', layers: ['maaamet-foto', 'maaamet-hybriid'] },
 ]
 
+const MAAAMET_WMS = 'https://gsavalik.envir.ee/geoserver/kataster/wms'
+
+export interface WmsOverlay {
+  id: string
+  label: string
+  url: string
+  wmsLayer: string
+  minzoom: number
+  opacity: number
+  visible: boolean
+  tiled: boolean
+  attribution: string
+}
+
+// Draw order: first entry is drawn lowest.
+export const OVERLAYS: WmsOverlay[] = [
+  {
+    id: 'ky-omandivorm',
+    label: 'KÜ Omandivorm',
+    url: MAAAMET_WMS,
+    wmsLayer: 'kataster:ky_omandivorm',
+    minzoom: 13,
+    opacity: 0.75,
+    visible: false,
+    tiled: true,
+    attribution: MAAAMET_ATTRIBUTION,
+  },
+  {
+    id: 'katastripiirid',
+    label: 'Katastripiirid',
+    url: MAAAMET_WMS,
+    wmsLayer: 'kataster:ky_kehtiv',
+    minzoom: 14,
+    opacity: 1,
+    visible: true,
+    tiled: true,
+    attribution: MAAAMET_ATTRIBUTION,
+  },
+  {
+    id: 'katastriandmed',
+    label: 'Katastriandmed',
+    url: MAAAMET_WMS,
+    wmsLayer: 'kataster:ky_tunnus_aadress',
+    minzoom: 15,
+    opacity: 1,
+    visible: true,
+    tiled: false,
+    attribution: MAAAMET_ATTRIBUTION,
+  },
+]
+
 export const LOGO = {
   src: '/logo.png',
   href: 'https://corle.ee/',

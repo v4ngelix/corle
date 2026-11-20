@@ -360,3 +360,17 @@ body,
     top: 52px;
   }
 }
+
+.layer-panel .overlay-tree {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #eceff1;
+}
+
+.layer-panel .overlay-root {
+  font-weight: 600;
+}
+
+.layer-panel .overlay-list {
+  padding-left: 16px;
+}
