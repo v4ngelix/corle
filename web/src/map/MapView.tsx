@@ -3,10 +3,11 @@ import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
 import './worker'
-import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, START_VIEW, TILE_LAYERS } from '../config'
+import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, TILE_LAYERS } from '../config'
 import { LayerControl } from './LayerControl'
 import { type LayerState, loadLayerState } from './layerState'
 import { LocateControl } from './LocateControl'
+import { loadView, saveView } from './viewHash'
 import { WmsImageUpdater, wmsLayer, wmsSource } from './wms'
 import { ZoomControl } from './ZoomControl'
 
@@ -39,10 +40,11 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
   useEffect(() => {
     const layerState = loadLayerState()
     const layers = buildLayers(layerState)
+    const view = loadView()
     const map = new MapLibreMap({
       container: containerRef.current!,
-      center: START_VIEW.center,
-      zoom: START_VIEW.zoom,
+      center: view.center,
+      zoom: view.zoom,
       maxZoom: MAX_ZOOM,
       maxBounds: MAX_BOUNDS,
       style: { version: 8, sources, layers },
@@ -56,6 +58,7 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
     })
     map.touchZoomRotate.disableRotation()
     map.keyboard.disableRotation()
+    map.on('moveend', () => saveView(map))
     for (const overlay of OVERLAYS) {
       if (!overlay.tiled) new WmsImageUpdater(map, overlay)
     }
