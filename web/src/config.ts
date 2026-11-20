@@ -7,6 +7,11 @@ export const START_VIEW = {
 
 export const MAX_ZOOM = 22
 
+export const MAX_BOUNDS: [[number, number], [number, number]] = [
+  [21.5, 57.3],
+  [28.5, 59.9],
+]
+
 export interface Basemap {
   id: string
   label: string

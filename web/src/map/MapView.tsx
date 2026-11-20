@@ -3,7 +3,7 @@ import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
 import './worker'
-import { BASEMAPS, MAX_ZOOM, START_VIEW } from '../config'
+import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, START_VIEW } from '../config'
 import { BasemapControl } from './BasemapControl'
 
 const sources: Record<string, SourceSpecification> = Object.fromEntries(
@@ -29,6 +29,7 @@ export function MapView() {
       center: START_VIEW.center,
       zoom: START_VIEW.zoom,
       maxZoom: MAX_ZOOM,
+      maxBounds: MAX_BOUNDS,
       style: { version: 8, sources, layers },
     })
     map.addControl(new BasemapControl(BASEMAPS), 'top-right')
