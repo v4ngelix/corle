@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
 import './worker'
 import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, START_VIEW, TILE_LAYERS } from '../config'
-import { BasemapControl } from './BasemapControl'
+import { LayerControl } from './LayerControl'
 
 const sources: Record<string, SourceSpecification> = Object.fromEntries(
   TILE_LAYERS.map(({ id, tiles, scheme, maxzoom, attribution }) => [
@@ -32,7 +32,7 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
       maxBounds: MAX_BOUNDS,
       style: { version: 8, sources, layers },
     })
-    map.addControl(new BasemapControl(BASEMAPS), 'top-right')
+    map.addControl(new LayerControl(BASEMAPS), 'top-right')
     onReady(map)
     return () => {
       onReady(null)

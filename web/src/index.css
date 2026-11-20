@@ -10,27 +10,97 @@ body,
   height: 100%;
 }
 
-.basemap-control {
-  margin: 10px 10px 0 0;
-  padding: 4px 8px 6px;
-  border: 0;
+.maplibregl-ctrl.layer-control {
+  position: relative;
+  margin: 12px 12px 0 0;
   font: 14px/1.2 system-ui, sans-serif;
+  color: #10384f;
 }
 
-.basemap-control legend {
-  display: contents;
+.layer-control-button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+  color: #78909c;
+  cursor: pointer;
+}
+
+.maplibregl-ctrl button.layer-control-button:not(:disabled):hover,
+.maplibregl-ctrl button.layer-control-button:not(:disabled):active {
+  background-color: #ffffff;
+}
+
+.layer-control-button:hover {
+  color: #10384f;
+}
+
+.layer-control-button[aria-expanded='true'] {
+  color: #9acd66;
+}
+
+.layer-control-button:focus {
+  outline: none;
+}
+
+.layer-control-button:focus-visible {
+  border-color: #9acd66;
+}
+
+.layer-control-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.layer-panel {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  min-width: 180px;
+  max-height: calc(100dvh - 120px);
+  overflow-y: auto;
+  padding: 6px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.layer-panel[hidden] {
+  display: none;
+}
+
+.layer-panel fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.layer-panel legend {
+  padding: 4px 0;
   font-weight: 600;
 }
 
-.basemap-control label {
+.layer-panel label {
   display: flex;
   align-items: center;
   gap: 6px;
   min-height: 32px;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.basemap-control input {
+.layer-panel input {
   margin: 0;
 }
 
@@ -238,7 +308,8 @@ body,
 
 /* Keep top-right controls clear of the search bar on narrow screens. */
 @media (max-width: 760px) {
-  .maplibregl-ctrl-top-right {
+  /* .map prefix: maplibre-gl.css loads after this file and would win at equal specificity. */
+  .map .maplibregl-ctrl-top-right {
     top: 52px;
   }
 }
