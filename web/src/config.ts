@@ -7,9 +7,30 @@ export const START_VIEW = {
 
 export const MAX_ZOOM = 22
 
-export const BASEMAP_MAAAMET_KAART = {
-  tiles: ['https://tiles.maaamet.ee/tm/tms/1.0.0/kaart@GMC/{z}/{x}/{y}.png'],
-  scheme: 'tms' as const,
-  maxzoom: 18,
-  attribution: '© Maa- ja Ruumiamet',
+export interface Basemap {
+  id: string
+  label: string
+  tiles: string[]
+  scheme: 'xyz' | 'tms'
+  maxzoom: number
+  attribution: string
 }
+
+export const BASEMAPS: Basemap[] = [
+  {
+    id: 'maaamet-kaart',
+    label: 'Kaart',
+    tiles: ['https://tiles.maaamet.ee/tm/tms/1.0.0/kaart@GMC/{z}/{x}/{y}.png'],
+    scheme: 'tms',
+    maxzoom: 18,
+    attribution: '© Maa- ja Ruumiamet',
+  },
+  {
+    id: 'maaamet-foto',
+    label: 'Foto',
+    tiles: ['https://tiles.maaamet.ee/tm/tms/1.0.0/foto@GMC/{z}/{x}/{y}.jpg'],
+    scheme: 'tms',
+    maxzoom: 18,
+    attribution: '© Maa- ja Ruumiamet',
+  },
+]
