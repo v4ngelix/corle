@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 import './worker'
 import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, START_VIEW, TILE_LAYERS } from '../config'
 import { LayerControl } from './LayerControl'
+import { type LayerState, loadLayerState } from './layerState'
 import { LocateControl } from './LocateControl'
 import { WmsImageUpdater, wmsLayer, wmsSource } from './wms'
 import { ZoomControl } from './ZoomControl'
@@ -19,20 +20,25 @@ const sources: Record<string, SourceSpecification> = {
   ...Object.fromEntries(OVERLAYS.map((o) => [o.id, wmsSource(o)])),
 }
 
-const layers: LayerSpecification[] = [
-  ...TILE_LAYERS.map(({ id }): LayerSpecification => ({
-    id,
-    type: 'raster',
-    source: id,
-    layout: { visibility: BASEMAPS[0].layers.includes(id) ? 'visible' : 'none' },
-  })),
-  ...OVERLAYS.map(wmsLayer),
-]
+function buildLayers(state: LayerState): LayerSpecification[] {
+  const basemapLayers = BASEMAPS.find((b) => b.id === state.basemap)?.layers ?? []
+  return [
+    ...TILE_LAYERS.map(({ id }): LayerSpecification => ({
+      id,
+      type: 'raster',
+      source: id,
+      layout: { visibility: basemapLayers.includes(id) ? 'visible' : 'none' },
+    })),
+    ...OVERLAYS.map((o) => wmsLayer(o, state.overlays.includes(o.id))),
+  ]
+}
 
 export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => void }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const layerState = loadLayerState()
+    const layers = buildLayers(layerState)
     const map = new MapLibreMap({
       container: containerRef.current!,
       center: START_VIEW.center,
@@ -55,7 +61,7 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
     }
     map.addControl(new ZoomControl(), 'top-left')
     map.addControl(new LocateControl(), 'top-right')
-    map.addControl(new LayerControl(BASEMAPS, OVERLAYS), 'top-right')
+    map.addControl(new LayerControl(BASEMAPS, OVERLAYS, layerState), 'top-right')
     onReady(map)
     return () => {
       onReady(null)

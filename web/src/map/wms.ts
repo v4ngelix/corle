@@ -46,13 +46,13 @@ export function wmsSource(overlay: WmsOverlay): SourceSpecification {
   }
 }
 
-export function wmsLayer(overlay: WmsOverlay): LayerSpecification {
+export function wmsLayer(overlay: WmsOverlay, visible: boolean): LayerSpecification {
   return {
     id: overlay.id,
     type: 'raster',
     source: overlay.id,
     minzoom: overlay.minzoom,
-    layout: { visibility: overlay.visible ? 'visible' : 'none' },
+    layout: { visibility: visible ? 'visible' : 'none' },
     paint: { 'raster-opacity': overlay.opacity, 'raster-fade-duration': 0 },
   }
 }

@@ -1,5 +1,6 @@
 import type { IControl, Map as MapLibreMap } from 'maplibre-gl'
 import type { Basemap, WmsOverlay } from '../config'
+import { type LayerState, saveLayerState } from './layerState'
 
 const LAYERS_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true">' +
@@ -14,11 +15,13 @@ export class LayerControl implements IControl {
   private container?: HTMLElement
   private button?: HTMLButtonElement
   private panel?: HTMLElement
+  private readonly state: LayerState
   private open = false
 
-  constructor(basemaps: Basemap[], overlays: WmsOverlay[]) {
+  constructor(basemaps: Basemap[], overlays: WmsOverlay[], state: LayerState) {
     this.basemaps = basemaps
     this.overlays = overlays
+    this.state = { basemap: state.basemap, overlays: [...state.overlays] }
   }
 
   onAdd(map: MapLibreMap): HTMLElement {
@@ -64,12 +67,12 @@ export class LayerControl implements IControl {
     legend.textContent = 'Aluskaardid'
     fieldset.append(legend)
 
-    this.basemaps.forEach((basemap, i) => {
+    this.basemaps.forEach((basemap) => {
       const input = document.createElement('input')
       input.type = 'radio'
       input.name = 'basemap'
       input.value = basemap.id
-      input.checked = i === 0
+      input.checked = basemap.id === this.state.basemap
       input.addEventListener('change', () => this.selectBasemap(map, basemap.id))
 
       const label = document.createElement('label')
@@ -98,10 +101,11 @@ export class LayerControl implements IControl {
     const inputs = this.overlays.map((overlay) => {
       const { label, input } = checkbox(overlay.label)
       input.value = overlay.id
-      input.checked = overlay.visible
+      input.checked = this.state.overlays.includes(overlay.id)
       input.addEventListener('change', () => {
         setLayer(input, input.checked)
         setTriState(root.input, inputs)
+        this.saveOverlays(inputs)
       })
       list.append(label)
       return input
@@ -110,6 +114,7 @@ export class LayerControl implements IControl {
     root.input.addEventListener('change', () => {
       inputs.forEach((c) => setLayer(c, root.input.checked))
       setTriState(root.input, inputs)
+      this.saveOverlays(inputs)
     })
 
     setTriState(root.input, inputs)
@@ -138,6 +143,13 @@ export class LayerControl implements IControl {
     for (const layerId of new Set(this.basemaps.flatMap((b) => b.layers))) {
       map.setLayoutProperty(layerId, 'visibility', visible.has(layerId) ? 'visible' : 'none')
     }
+    this.state.basemap = id
+    saveLayerState(this.state)
+  }
+
+  private saveOverlays(inputs: HTMLInputElement[]): void {
+    this.state.overlays = inputs.filter((c) => c.checked).map((c) => c.value)
+    saveLayerState(this.state)
   }
 }
 
