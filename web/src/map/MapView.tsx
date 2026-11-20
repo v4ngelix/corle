@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 import './worker'
 import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, START_VIEW, TILE_LAYERS } from '../config'
 import { LayerControl } from './LayerControl'
+import { LocateControl } from './LocateControl'
 import { WmsImageUpdater, wmsLayer, wmsSource } from './wms'
 import { ZoomControl } from './ZoomControl'
 
@@ -42,6 +43,10 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,
+      locale: {
+        'GeolocateControl.FindMyLocation': 'Minu asukoht',
+        'GeolocateControl.LocationNotAvailable': 'Asukoht pole saadaval',
+      },
     })
     map.touchZoomRotate.disableRotation()
     map.keyboard.disableRotation()
@@ -49,6 +54,7 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
       if (!overlay.tiled) new WmsImageUpdater(map, overlay)
     }
     map.addControl(new ZoomControl(), 'top-left')
+    map.addControl(new LocateControl(), 'top-right')
     map.addControl(new LayerControl(BASEMAPS, OVERLAYS), 'top-right')
     onReady(map)
     return () => {
