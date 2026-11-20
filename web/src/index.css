@@ -104,6 +104,53 @@ body,
   margin: 0;
 }
 
+/* Zoom buttons, below the search bar. .map prefix: maplibre-gl.css loads after this file. */
+.map .maplibregl-ctrl-top-left .maplibregl-ctrl-group {
+  margin: 56px 0 0 12px;
+  overflow: hidden;
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.map .maplibregl-ctrl-group button {
+  width: 40px;
+  height: 40px;
+  color: #78909c;
+}
+
+.map .maplibregl-ctrl-group button + button {
+  border-top: 1px solid #cfd8dc;
+}
+
+.map .maplibregl-ctrl-group button:not(:disabled):hover,
+.map .maplibregl-ctrl-group button:not(:disabled):active {
+  background-color: #ffffff;
+  color: #10384f;
+}
+
+.map .maplibregl-ctrl-group button:focus,
+.map .maplibregl-ctrl-group button:focus:focus-visible {
+  box-shadow: none;
+}
+
+.map .maplibregl-ctrl-group button:focus-visible {
+  color: #9acd66;
+}
+
+.map .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  background: currentColor;
+  mask: no-repeat center / 29px 29px;
+}
+
+.map .maplibregl-ctrl-group .maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath d='M14.5 8.5c-.75 0-1.5.75-1.5 1.5v3h-3c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h3v3c0 .75.75 1.5 1.5 1.5S16 19.75 16 19v-3h3c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-3v-3c0-.75-.75-1.5-1.5-1.5'/%3E%3C/svg%3E");
+}
+
+.map .maplibregl-ctrl-group .maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath d='M10 13c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h9c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13z'/%3E%3C/svg%3E");
+}
+
 .map-controls-container {
   position: absolute;
   top: 12px;
