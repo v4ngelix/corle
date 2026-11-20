@@ -84,6 +84,17 @@ export const OVERLAYS: WmsOverlay[] = [
     attribution: MAAAMET_ATTRIBUTION,
   },
   {
+    id: 'elasa',
+    label: 'ELASA',
+    url: `${window.location.origin}/api/elasa/wms`,
+    wmsLayer: 'avalik_trassid',
+    minzoom: 0,
+    opacity: 1,
+    visible: false,
+    tiled: true,
+    attribution: 'ELASA',
+  },
+  {
     id: 'katastripiirid',
     label: 'Katastripiirid',
     url: MAAAMET_WMS,
