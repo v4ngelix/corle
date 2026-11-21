@@ -358,6 +358,7 @@ body,
   flex: 0 1 auto;
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 40px;
   min-width: 75px;
   box-sizing: border-box;
