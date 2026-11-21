@@ -192,3 +192,23 @@ export const ADDRESS_SEARCH = {
   maxZoom: 18,
   extentHighlightMs: 2500,
 }
+
+export const CADASTRE_POPUP = {
+  url: 'https://gsavalik.envir.ee/geoserver/kataster/wfs',
+  wfsLayer: 'kataster:ky_tunnus_aadress',
+  overlayId: 'katastriandmed',
+  minZoom: 15,
+  searchRadius: 1, // EPSG:3857 units, as in the old app
+  registryUrl: 'https://kinnistusraamat.rik.ee/PealeheOtsinguTulemus.aspx?term=',
+  fields: [
+    ['l_aadress', 'Aadress'],
+    ['ay_nimi', 'Asustusüksus'],
+    ['ov_nimi', 'Omavalitsus'],
+    ['mk_nimi', 'Maakond'],
+    ['tunnus', 'Katastritunnus'],
+    ['kinnistu', 'Kinnistu nr'],
+    ['siht1', 'Sihtotstarve'],
+    ['omvorm', 'Omandivorm'],
+    ['ads_oid', 'ADS OID'],
+  ] as const,
+}

@@ -548,3 +548,43 @@ body,
 .layer-panel .overlay-list {
   padding-left: 16px;
 }
+
+.cadastre-popup .maplibregl-popup-content {
+  max-height: 22rem;
+  overflow: auto;
+  font: 0.75rem/1.3 system-ui, sans-serif;
+}
+
+.cadastre-popup-title {
+  display: inline-block;
+  margin-bottom: 0.3rem;
+  padding: 0.4rem 0.5rem;
+  background: #005aa3;
+  color: #fff;
+  font-weight: 600;
+}
+
+.cadastre-popup table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  overflow-wrap: break-word;
+}
+
+.cadastre-popup tr + tr {
+  border-top: 1px solid #eee;
+}
+
+.cadastre-popup td {
+  padding: 0.25rem;
+  vertical-align: top;
+}
+
+.cadastre-popup td:first-child {
+  width: 40%;
+  font-weight: 600;
+}
+
+.cadastre-popup a {
+  color: #005aa3;
+}

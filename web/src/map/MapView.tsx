@@ -5,6 +5,7 @@ import { Protocol } from 'pmtiles'
 import { useEffect, useRef } from 'react'
 import './worker'
 import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, TILE_LAYERS } from '../config'
+import { CadastrePopup } from './CadastrePopup'
 import { LayerControl } from './LayerControl'
 import { type LayerState, loadLayerState } from './layerState'
 import { LocateControl } from './LocateControl'
@@ -63,6 +64,8 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
     })
     map.touchZoomRotate.disableRotation()
     map.keyboard.disableRotation()
+    map.doubleClickZoom.disable()
+    new CadastrePopup(map)
     map.on('moveend', () => saveView(map))
     for (const overlay of OVERLAYS) {
       if (overlay.kind === 'wms' && !overlay.tiled) new WmsImageUpdater(map, overlay)
