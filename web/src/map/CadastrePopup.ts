@@ -58,7 +58,7 @@ function details(props: Properties): HTMLElement {
 
 export class CadastrePopup {
   private readonly map: MapLibreMap
-  private readonly popup = new Popup({ className: 'cadastre-popup', maxWidth: '300px' })
+  private readonly popup = new Popup({ className: 'cadastre-popup', maxWidth: '18.75rem' })
   private request?: AbortController
 
   constructor(map: MapLibreMap) {
