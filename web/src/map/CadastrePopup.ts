@@ -56,7 +56,6 @@ function details(props: Properties): HTMLElement {
   return root
 }
 
-/** Double-click at zoom >= 15 with "Katastriandmed" on: shows the cadastral unit under the point (WFS). */
 export class CadastrePopup {
   private readonly map: MapLibreMap
   private readonly popup = new Popup({ className: 'cadastre-popup', maxWidth: '300px' })

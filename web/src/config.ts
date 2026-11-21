@@ -209,7 +209,7 @@ export const CADASTRE_POPUP = {
   wfsLayer: 'kataster:ky_tunnus_aadress',
   overlayId: 'katastriandmed',
   minZoom: 15,
-  searchRadius: 1, // EPSG:3857 units, as in the old app
+  searchRadius: 1,
   registryUrl: 'https://kinnistusraamat.rik.ee/PealeheOtsinguTulemus.aspx?term=',
   fields: [
     ['l_aadress', 'Aadress'],
