@@ -10,12 +10,12 @@ import { uploads } from './routes/uploads.ts'
 
 export interface AppOptions {
   dataDir: string
-  /** Shared login password. Unset → nobody can log in. */
   adminPassword?: string
   elasa?: ElasaOptions
+  webDir?: string
 }
 
-export function buildApp({ dataDir, adminPassword, elasa: elasaOptions }: AppOptions) {
+export function buildApp({ dataDir, adminPassword, elasa: elasaOptions, webDir }: AppOptions) {
   const app = express()
   app.disable('x-powered-by')
   const sessions = new Sessions()
@@ -29,6 +29,7 @@ export function buildApp({ dataDir, adminPassword, elasa: elasaOptions }: AppOpt
   app.use('/api/layers', layerFiles(dataDir, sessions))
   app.use('/api/uploads', uploads)
   app.use('/layers', layers(join(dataDir, 'layers')))
+  if (webDir) app.use(express.static(webDir))
 
   return app
 }

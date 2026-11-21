@@ -10,12 +10,15 @@ import { buildApp } from '../src/app.ts'
 let server: Server
 let base: string
 const dataDir = mkdtempSync(join(tmpdir(), 'corle-test-'))
+const webDir = mkdtempSync(join(tmpdir(), 'corle-web-'))
 const tiles = Buffer.from('0123456789')
+const indexHtml = '<!doctype html><title>CORLE</title>'
 
 before(async () => {
   mkdirSync(join(dataDir, 'layers'))
   writeFileSync(join(dataDir, 'layers', 'static.pmtiles'), tiles)
-  server = buildApp({ dataDir }).listen(0)
+  writeFileSync(join(webDir, 'index.html'), indexHtml)
+  server = buildApp({ dataDir, webDir }).listen(0)
   await new Promise((resolve) => server.once('listening', resolve))
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
 })
@@ -23,6 +26,7 @@ before(async () => {
 after(() => {
   server.close()
   rmSync(dataDir, { recursive: true, force: true })
+  rmSync(webDir, { recursive: true, force: true })
 })
 
 test('GET /api/health returns ok', async () => {
@@ -68,4 +72,10 @@ test('GET /layers/static.pmtiles supports range requests', async () => {
 test('missing layer file returns 404', async () => {
   const res = await fetch(`${base}/layers/nope.pmtiles`)
   assert.equal(res.status, 404)
+})
+
+test('GET / serves the built frontend', async () => {
+  const res = await fetch(`${base}/`)
+  assert.equal(res.status, 200)
+  assert.equal(await res.text(), indexHtml)
 })
