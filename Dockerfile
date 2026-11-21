@@ -25,6 +25,7 @@ COPY server/package.json server/package-lock.json ./
 RUN npm ci --omit=dev
 COPY server/src ./src
 COPY scripts/ /app/scripts/
+COPY seed/ /app/seed/
 COPY --from=web /app/web/dist /app/web/dist
 RUN mkdir /data && chown node:node /data
 VOLUME /data

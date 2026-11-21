@@ -1,8 +1,8 @@
 import express, { Router } from 'express'
 import { copyFile, mkdir, rename, rm, stat, writeFile } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
+import { join } from 'node:path'
 import { requireAuth, type Sessions } from '../auth.ts'
-import { ogrinfo, reprojectTo3301, runScript } from '../gdal.ts'
+import { buildStaticLayers, ogrinfo, reprojectTo3301 } from '../gdal.ts'
 
 type GeometryFamily = 'line' | 'polygon'
 
@@ -21,7 +21,6 @@ const GEOMETRY_NAMES: Record<GeometryFamily, string> = { line: 'jooned', polygon
 const ESTONIA = { minE: 300_000, maxE: 800_000, minN: 6_300_000, maxN: 6_700_000 }
 
 const MAX_UPLOAD = '50mb'
-const REBUILD_SCRIPT = resolve(import.meta.dirname, '../../../scripts/import-static-layers.sh')
 
 class UploadError extends Error {}
 
@@ -77,7 +76,7 @@ export function layerFiles(dataDir: string, sessions: Sessions) {
   const sourceDir = join(dataDir, 'source')
   const historyDir = join(sourceDir, 'history')
   const sourceFile = (id: string) => join(sourceDir, `${id}.gpkg`)
-  const rebuild = () => runScript(REBUILD_SCRIPT, { DATA_DIR: dataDir })
+  const rebuild = () => buildStaticLayers(dataDir)
 
   let queue: Promise<unknown> = Promise.resolve()
   const serialized = <T>(work: () => Promise<T>): Promise<T> => {

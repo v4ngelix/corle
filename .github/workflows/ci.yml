@@ -48,7 +48,7 @@ jobs:
       - name: Upload files
         run: |
           mkdir -p out/web
-          cp -r server scripts out/
+          cp -r server scripts seed out/
           cp -r web/dist out/web/
           rm -rf out/server/test out/server/.env
           rsync -az --delete \

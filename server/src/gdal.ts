@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process'
+import { resolve } from 'node:path'
 import { promisify } from 'node:util'
 
 const run = promisify(execFile)
@@ -40,6 +41,9 @@ export async function readGeoJson(file: string, layer: string, srs: string, prec
   return (JSON.parse(stdout) as { features: GeoJsonFeature[] }).features
 }
 
-export async function runScript(script: string, env: Record<string, string>): Promise<void> {
-  await run(script, [], { env: { ...process.env, ...env } })
+const STATIC_LAYERS_SCRIPT = resolve(import.meta.dirname, '../../scripts/import-static-layers.sh')
+
+/** Rebuilds `<dataDir>/layers/static.pmtiles` from the GeoPackages in `<dataDir>/source/`. */
+export async function buildStaticLayers(dataDir: string): Promise<void> {
+  await run(STATIC_LAYERS_SCRIPT, [], { env: { ...process.env, DATA_DIR: dataDir } })
 }
