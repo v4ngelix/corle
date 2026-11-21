@@ -20,5 +20,8 @@
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.2",
     "typescript": "~6.0.3"
+  },
+  "allowScripts": {
+    "gdal-async@3.12.3": true
   }
 }
