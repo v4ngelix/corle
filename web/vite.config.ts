@@ -10,6 +10,8 @@ const proxy: Record<string, ProxyOptions> = {
     rewrite: (path) => path.replace(/^\/api\/elasa\/wms/, '/wms/elasa'),
     headers: { Referer: 'https://kaart.elasa.ee/' },
   },
+  // Must stay after the ELASA entry: the first matching key wins.
+  '/api': { target: 'http://127.0.0.1:3000' },
 }
 
 export default defineConfig({

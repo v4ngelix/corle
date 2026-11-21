@@ -8,7 +8,7 @@ corle/
 │   │   └── main.tsx
 │   ├── index.html           # noindex meta
 │   └── vite.config.ts       # dev proxy /api → server
-├── server/                  # Fastify + better-sqlite3
+├── server/                  # Express 5 + better-sqlite3
 │   ├── src/
 │   │   ├── routes/          # drawings, layers, elasa, auth, uploads
 │   │   ├── db/              # schema.sql, queries
