@@ -2,6 +2,7 @@ import express, { Router } from 'express'
 import { copyFile, mkdir, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { requireAuth, type Sessions } from '../auth.ts'
+import gdal from 'gdal-async'
 import { buildStaticLayers, ogrinfo, reprojectTo3301 } from '../gdal.ts'
 
 type GeometryFamily = 'line' | 'polygon'
@@ -12,9 +13,9 @@ const LAYERS: { id: string; label: string; geometry: GeometryFamily }[] = [
   { id: 'mastid', label: 'Mastid', geometry: 'polygon' },
 ]
 
-const GEOMETRY_TYPES: Record<GeometryFamily, string[]> = {
-  line: ['LineString', 'MultiLineString'],
-  polygon: ['Polygon', 'MultiPolygon'],
+const GEOMETRY_TYPES: Record<GeometryFamily, number[]> = {
+  line: [gdal.wkbLineString, gdal.wkbMultiLineString],
+  polygon: [gdal.wkbPolygon, gdal.wkbMultiPolygon],
 }
 const GEOMETRY_NAMES: Record<GeometryFamily, string> = { line: 'jooned', polygon: 'pinnad' }
 
@@ -42,11 +43,6 @@ function fileTimestamp(date: Date): string {
   return `${parts.year}-${parts.month}-${parts.day}_${parts.hour}-${parts.minute}`
 }
 
-/** "3D MultiLineString" / "LineString Z" → "LineString" style base names. */
-function baseType(type: string): string {
-  return type.replace(/^3D /, '').replace(/ (Z|M|ZM)$/, '')
-}
-
 async function validate(file: string, geometry: GeometryFamily): Promise<{ needsReprojection: boolean }> {
   const layers = await ogrinfo(file).catch(() => {
     throw new UploadError('Faili ei saa avada. Kas see on GeoPackage (.gpkg)?')
@@ -54,13 +50,11 @@ async function validate(file: string, geometry: GeometryFamily): Promise<{ needs
   if (layers.length !== 1) throw new UploadError(`Failis peab olema täpselt üks kiht, praegu on ${layers.length}.`)
   const [layer] = layers
   if (layer.featureCount === 0) throw new UploadError('Kihis pole ühtegi objekti.')
-  const field = layer.geometryFields[0]
-  if (!field || !GEOMETRY_TYPES[geometry].includes(baseType(field.type))) {
-    throw new UploadError(`Selles kihis peavad olema ${GEOMETRY_NAMES[geometry]}, failis on ${field?.type ?? 'geomeetriata'}.`)
+  if (!GEOMETRY_TYPES[geometry].includes(layer.geometryType)) {
+    throw new UploadError(`Selles kihis peavad olema ${GEOMETRY_NAMES[geometry]}, failis on ${layer.geometryName || 'geomeetriata'}.`)
   }
-  if (!field.coordinateSystem) throw new UploadError('Failil puudub koordinaatsüsteem.')
-  const id = field.coordinateSystem.projjson?.id
-  return { needsReprojection: !(id?.authority === 'EPSG' && id.code === 3301) }
+  if (!layer.hasCoordinateSystem) throw new UploadError('Failil puudub koordinaatsüsteem.')
+  return { needsReprojection: layer.epsg !== 3301 }
 }
 
 function checkInEstonia(extent: [number, number, number, number] | undefined): void {
@@ -98,7 +92,7 @@ export function layerFiles(dataDir: string, sessions: Sessions) {
         })
         ready = reprojected
       }
-      checkInEstonia((await ogrinfo(ready))[0].geometryFields[0].extent)
+      checkInEstonia((await ogrinfo(ready))[0].extent)
 
       await mkdir(historyDir, { recursive: true })
       const backup = join(historyDir, `${id}-${new Date().toISOString().replace(/[:.]/g, '-')}.gpkg`)

@@ -5,8 +5,10 @@ import type { Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { ogr2ogr } from './ogr2ogr.ts'
 import { after, before, describe, test } from 'node:test'
 import { buildApp } from '../src/app.ts'
+import { ogrinfo } from '../src/gdal.ts'
 
 const PASSWORD = 'test-password'
 const dataDir = mkdtempSync(join(tmpdir(), 'corle-layerfiles-'))
@@ -57,7 +59,7 @@ function gpkg(name: string, geometry: object, epsg = 3301): string {
     geojson,
     JSON.stringify({ type: 'FeatureCollection', features: [{ type: 'Feature', properties: { nimi: name }, geometry }] }),
   )
-  execFileSync('ogr2ogr', ['-f', 'GPKG', out, geojson, '-nln', name, '-a_srs', `EPSG:${epsg}`])
+  ogr2ogr(out, geojson, ['-nln', name, '-a_srs', `EPSG:${epsg}`])
   return out
 }
 
@@ -80,10 +82,6 @@ function upload(id: string, file: string | Buffer, withCookie = true) {
 function historyFiles(id: string): string[] {
   const dir = join(sourceDir, 'history')
   return existsSync(dir) ? readdirSync(dir).filter((f) => f.startsWith(`${id}-`)) : []
-}
-
-function layerInfo(file: string) {
-  return JSON.parse(execFileSync('ogrinfo', ['-json', '-so', file], { encoding: 'utf8' }))
 }
 
 before(async () => {
@@ -193,7 +191,7 @@ describe('layer files', () => {
       'mastid',
       () => {
         const file = gpkg('bad-two', polygon3301)
-        execFileSync('ogr2ogr', ['-update', file, gpkg('bad-two-b', polygon3301), '-nln', 'teine'])
+        ogr2ogr(file, gpkg('bad-two-b', polygon3301), ['-nln', 'teine'], true)
         return file
       },
     ],
@@ -224,14 +222,13 @@ describe('layer files', () => {
     assert.equal(history.length, 1)
     assert.deepEqual(readFileSync(join(sourceDir, 'history', history[0])), old)
     assert.ok(statSync(pmtiles).size > 0)
-    const layers = layerInfo(pmtiles).layers.map((l: { name: string }) => l.name)
+    const layers = (await ogrinfo(pmtiles)).map((l) => l.name)
     assert.deepEqual(layers.sort(), ['5g', 'mastid', 'seadustusala'])
   })
 
   test('upload in another coordinate system is stored in EPSG:3301', async () => {
     const res = await upload('seadustusala', gpkg('sa-4326', polygon4326, 4326))
     assert.equal(res.status, 200, await res.clone().text())
-    const crs = layerInfo(join(sourceDir, 'seadustusala.gpkg')).layers[0].geometryFields[0].coordinateSystem
-    assert.match(JSON.stringify(crs), /"EPSG",\s*3301|EPSG:3301|"code":\s*3301/)
+    assert.equal((await ogrinfo(join(sourceDir, 'seadustusala.gpkg')))[0].epsg, 3301)
   })
 })

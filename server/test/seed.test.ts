@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { ogr2ogr } from './ogr2ogr.ts'
 import { after, describe, test } from 'node:test'
 import { countDrawings, openDb } from '../src/db.ts'
 import { seedDataDir } from '../src/seed.ts'
@@ -22,7 +22,7 @@ const drawing = {
 function gpkg(file: string, layer: string, features: object[]): void {
   const geojson = join(root, `${layer}.geojson`)
   writeFileSync(geojson, JSON.stringify({ type: 'FeatureCollection', features }))
-  execFileSync('ogr2ogr', ['-f', 'GPKG', file, geojson, '-nln', layer, '-a_srs', 'EPSG:3301'])
+  ogr2ogr(file, geojson, ['-nln', layer, '-a_srs', 'EPSG:3301'])
 }
 const feature = (geometry: object) => ({ type: 'Feature', properties: {}, geometry })
 

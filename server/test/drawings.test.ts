@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { get, type Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { ogr2ogr } from './ogr2ogr.ts'
 import { after, before, describe, test } from 'node:test'
 import { buildApp } from '../src/app.ts'
 import { countDrawings, openDb } from '../src/db.ts'
@@ -55,7 +55,7 @@ const fixture = {
 before(() => {
   const src = join(fixtures, 'teostused.geojson')
   writeFileSync(src, JSON.stringify(fixture))
-  execFileSync('ogr2ogr', ['-f', 'GPKG', gpkg, src, '-nln', 'liidetud'])
+  ogr2ogr(gpkg, src, ['-nln', 'liidetud'])
 })
 
 after(() => {
