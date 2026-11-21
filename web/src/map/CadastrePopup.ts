@@ -18,6 +18,13 @@ function getFeatureUrl([x, y]: [number, number]): string {
   return `${CADASTRE_POPUP.url}?${params}`
 }
 
+async function fetchFeature(point: [number, number], signal: AbortSignal): Promise<Properties | undefined> {
+  const response = await fetch(getFeatureUrl(point), { signal })
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  const data = (await response.json()) as { features?: { properties: Properties }[] }
+  return data.features?.[0]?.properties
+}
+
 function message(text: string): HTMLElement {
   const node = document.createElement('div')
   node.textContent = text
@@ -77,11 +84,8 @@ export class CadastrePopup {
 
     let content: HTMLElement
     try {
-      const response = await fetch(getFeatureUrl(toMercator(e.lngLat.toArray())), { signal: request.signal })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      const data = (await response.json()) as { features?: { properties: Properties }[] }
-      const feature = data.features?.[0]
-      content = feature ? details(feature.properties) : message('Selles punktis puudub katastriüksus.')
+      const props = await fetchFeature(toMercator(e.lngLat.toArray()), request.signal)
+      content = props ? details(props) : message('Selles punktis puudub katastriüksus.')
     } catch (error) {
       if (request.signal.aborted) return
       console.error('Cadastre WFS request failed', error)
