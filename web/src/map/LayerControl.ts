@@ -1,7 +1,8 @@
-import type { IControl, Map as MapLibreMap } from 'maplibre-gl'
+import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { Basemap, Overlay } from '../config'
 import { type LayerState, saveLayerState } from './layerState'
 import { setOverlayVisible } from './overlays'
+import { PopupControl } from './PopupControl'
 
 const LAYERS_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true">' +
@@ -10,55 +11,20 @@ const LAYERS_ICON =
   '<path d="m2 17.5 10 5.5 10-5.5"/>' +
   '</svg>'
 
-export class LayerControl implements IControl {
+export class LayerControl extends PopupControl {
   private readonly basemaps: Basemap[]
   private readonly overlays: Overlay[]
-  private container?: HTMLElement
-  private button?: HTMLButtonElement
-  private panel?: HTMLElement
   private readonly state: LayerState
-  private open = false
 
   constructor(basemaps: Basemap[], overlays: Overlay[], state: LayerState) {
+    super({ id: 'layer-panel', title: 'Kihid', icon: LAYERS_ICON })
     this.basemaps = basemaps
     this.overlays = overlays
     this.state = { basemap: state.basemap, overlays: [...state.overlays] }
   }
 
-  onAdd(map: MapLibreMap): HTMLElement {
-    const container = document.createElement('div')
-    container.className = 'maplibregl-ctrl layer-control'
-
-    const button = document.createElement('button')
-    button.type = 'button'
-    button.className = 'layer-control-button'
-    button.title = 'Kihid'
-    button.setAttribute('aria-label', 'Kihid')
-    button.setAttribute('aria-controls', 'layer-panel')
-    button.innerHTML = LAYERS_ICON
-    button.addEventListener('click', () => this.setOpen(!this.open))
-
-    const panel = document.createElement('div')
-    panel.id = 'layer-panel'
-    panel.className = 'layer-panel'
-    panel.append(this.basemapFieldset(map), this.overlayFieldset(map))
-
-    container.append(button, panel)
-    this.container = container
-    this.button = button
-    this.panel = panel
-    this.setOpen(false)
-
-    document.addEventListener('pointerdown', this.onPointerDown, true)
-    document.addEventListener('keydown', this.onKeyDown)
-    return container
-  }
-
-  onRemove(): void {
-    document.removeEventListener('pointerdown', this.onPointerDown, true)
-    document.removeEventListener('keydown', this.onKeyDown)
-    this.container?.remove()
-    this.container = this.button = this.panel = undefined
+  protected override panelContent(map: MapLibreMap): HTMLElement[] {
+    return [this.basemapFieldset(map), this.overlayFieldset(map)]
   }
 
   private basemapFieldset(map: MapLibreMap): HTMLElement {
@@ -120,23 +86,6 @@ export class LayerControl implements IControl {
 
     setTriState(root.input, inputs)
     return fieldset
-  }
-
-  private setOpen(open: boolean): void {
-    this.open = open
-    this.panel!.hidden = !open
-    this.button!.setAttribute('aria-expanded', String(open))
-  }
-
-  private readonly onPointerDown = (e: PointerEvent): void => {
-    if (this.open && !this.container?.contains(e.target as Node)) this.setOpen(false)
-  }
-
-  private readonly onKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape' && this.open) {
-      this.setOpen(false)
-      this.button?.focus()
-    }
   }
 
   private selectBasemap(map: MapLibreMap, id: string): void {
