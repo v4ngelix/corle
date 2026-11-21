@@ -1,6 +1,7 @@
 import type { IControl, Map as MapLibreMap } from 'maplibre-gl'
-import type { Basemap, WmsOverlay } from '../config'
+import type { Basemap, Overlay } from '../config'
 import { type LayerState, saveLayerState } from './layerState'
+import { setOverlayVisible } from './overlays'
 
 const LAYERS_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true">' +
@@ -11,14 +12,14 @@ const LAYERS_ICON =
 
 export class LayerControl implements IControl {
   private readonly basemaps: Basemap[]
-  private readonly overlays: WmsOverlay[]
+  private readonly overlays: Overlay[]
   private container?: HTMLElement
   private button?: HTMLButtonElement
   private panel?: HTMLElement
   private readonly state: LayerState
   private open = false
 
-  constructor(basemaps: Basemap[], overlays: WmsOverlay[], state: LayerState) {
+  constructor(basemaps: Basemap[], overlays: Overlay[], state: LayerState) {
     this.basemaps = basemaps
     this.overlays = overlays
     this.state = { basemap: state.basemap, overlays: [...state.overlays] }
@@ -93,17 +94,17 @@ export class LayerControl implements IControl {
     list.className = 'overlay-list'
     fieldset.append(root.label, list)
 
-    const setLayer = (input: HTMLInputElement, checked: boolean): void => {
-      input.checked = checked
-      map.setLayoutProperty(input.value, 'visibility', checked ? 'visible' : 'none')
+    const setLayer = (i: number, checked: boolean): void => {
+      inputs[i].checked = checked
+      setOverlayVisible(map, this.overlays[i], checked)
     }
 
-    const inputs = this.overlays.map((overlay) => {
+    const inputs = this.overlays.map((overlay, i) => {
       const { label, input } = checkbox(overlay.label)
       input.value = overlay.id
       input.checked = this.state.overlays.includes(overlay.id)
       input.addEventListener('change', () => {
-        setLayer(input, input.checked)
+        setLayer(i, input.checked)
         setTriState(root.input, inputs)
         this.saveOverlays(inputs)
       })
@@ -112,7 +113,7 @@ export class LayerControl implements IControl {
     })
 
     root.input.addEventListener('change', () => {
-      inputs.forEach((c) => setLayer(c, root.input.checked))
+      inputs.forEach((_, i) => setLayer(i, root.input.checked))
       setTriState(root.input, inputs)
       this.saveOverlays(inputs)
     })

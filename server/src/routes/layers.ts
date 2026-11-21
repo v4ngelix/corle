@@ -1,6 +1,5 @@
-import { Router } from 'express'
-import { notImplemented } from './notImplemented.ts'
+import express from 'express'
 
-export const layers = Router()
-
-layers.get('/:name.geojson', notImplemented)
+export function layers(dir: string) {
+  return express.static(dir, { index: false })
+}

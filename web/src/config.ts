@@ -1,3 +1,5 @@
+import type { FillLayerSpecification, LineLayerSpecification } from 'maplibre-gl'
+
 export const START_VIEW = {
   center: [25.5, 58.7] as [number, number],
   zoom: 7,
@@ -60,6 +62,7 @@ export const BASEMAPS: Basemap[] = [
 const MAAAMET_WMS = 'https://gsavalik.envir.ee/geoserver/kataster/wms'
 
 export interface WmsOverlay {
+  kind: 'wms'
   id: string
   label: string
   url: string
@@ -71,8 +74,29 @@ export interface WmsOverlay {
   attribution: string
 }
 
-export const OVERLAYS: WmsOverlay[] = [
+type StyleKeys = 'type' | 'minzoom' | 'layout' | 'paint'
+export type VectorStyle = Pick<FillLayerSpecification, StyleKeys> | Pick<LineLayerSpecification, StyleKeys>
+
+export interface VectorOverlay {
+  kind: 'vector'
+  id: string
+  label: string
+  visible: boolean
+  styles: VectorStyle[]
+}
+
+export type Overlay = WmsOverlay | VectorOverlay
+
+export const STATIC_LAYERS = {
+  url: `pmtiles://${window.location.origin}/layers/static.pmtiles`,
+  attribution: 'Corle OÜ',
+}
+
+const ROUND_LINE = { 'line-cap': 'round', 'line-join': 'round' } as const
+
+export const OVERLAYS: Overlay[] = [
   {
+    kind: 'wms',
     id: 'ky-omandivorm',
     label: 'KÜ Omandivorm',
     url: MAAAMET_WMS,
@@ -84,6 +108,40 @@ export const OVERLAYS: WmsOverlay[] = [
     attribution: MAAAMET_ATTRIBUTION,
   },
   {
+    kind: 'vector',
+    id: 'seadustusala',
+    label: 'Seadustusala',
+    visible: true,
+    styles: [
+      {
+        type: 'fill',
+        minzoom: 7,
+        paint: { 'fill-color': '#e77148', 'fill-outline-color': '#232323', 'fill-opacity': 0.5 },
+      },
+    ],
+  },
+  {
+    kind: 'vector',
+    id: '5g',
+    label: '5G',
+    visible: false,
+    styles: [
+      { type: 'line', layout: ROUND_LINE, paint: { 'line-color': '#000000', 'line-width': 7 } },
+      { type: 'line', layout: ROUND_LINE, paint: { 'line-color': '#11ff44', 'line-width': 5 } },
+    ],
+  },
+  {
+    kind: 'vector',
+    id: 'mastid',
+    label: 'Mastid',
+    visible: false,
+    styles: [
+      { type: 'fill', paint: { 'fill-color': '#de258f' } },
+      { type: 'line', paint: { 'line-color': '#dc4523', 'line-width': 7 } },
+    ],
+  },
+  {
+    kind: 'wms',
     id: 'elasa',
     label: 'ELASA',
     url: `${window.location.origin}/api/elasa/wms`,
@@ -95,6 +153,7 @@ export const OVERLAYS: WmsOverlay[] = [
     attribution: 'ELASA',
   },
   {
+    kind: 'wms',
     id: 'katastripiirid',
     label: 'Katastripiirid',
     url: MAAAMET_WMS,
@@ -106,6 +165,7 @@ export const OVERLAYS: WmsOverlay[] = [
     attribution: MAAAMET_ATTRIBUTION,
   },
   {
+    kind: 'wms',
     id: 'katastriandmed',
     label: 'Katastriandmed',
     url: MAAAMET_WMS,

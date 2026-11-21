@@ -1,15 +1,19 @@
-import { MapLibreMap } from 'maplibre-gl'
+import { addProtocol, MapLibreMap } from 'maplibre-gl'
 import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { Protocol } from 'pmtiles'
 import { useEffect, useRef } from 'react'
 import './worker'
 import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, TILE_LAYERS } from '../config'
 import { LayerControl } from './LayerControl'
 import { type LayerState, loadLayerState } from './layerState'
 import { LocateControl } from './LocateControl'
+import { overlayLayers, overlaySources } from './overlays'
 import { loadView, saveView } from './viewHash'
-import { WmsImageUpdater, wmsLayer, wmsSource } from './wms'
+import { WmsImageUpdater } from './wms'
 import { ZoomControl } from './ZoomControl'
+
+addProtocol('pmtiles', new Protocol().tile)
 
 const sources: Record<string, SourceSpecification> = {
   ...Object.fromEntries(
@@ -18,7 +22,7 @@ const sources: Record<string, SourceSpecification> = {
       { type: 'raster', tileSize: 256, tiles, scheme, maxzoom, attribution },
     ]),
   ),
-  ...Object.fromEntries(OVERLAYS.map((o) => [o.id, wmsSource(o)])),
+  ...overlaySources,
 }
 
 function buildLayers(state: LayerState): LayerSpecification[] {
@@ -30,7 +34,7 @@ function buildLayers(state: LayerState): LayerSpecification[] {
       source: id,
       layout: { visibility: basemapLayers.includes(id) ? 'visible' : 'none' },
     })),
-    ...OVERLAYS.map((o) => wmsLayer(o, state.overlays.includes(o.id))),
+    ...OVERLAYS.flatMap((o) => overlayLayers(o, state.overlays.includes(o.id))),
   ]
 }
 
@@ -60,7 +64,7 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
     map.keyboard.disableRotation()
     map.on('moveend', () => saveView(map))
     for (const overlay of OVERLAYS) {
-      if (!overlay.tiled) new WmsImageUpdater(map, overlay)
+      if (overlay.kind === 'wms' && !overlay.tiled) new WmsImageUpdater(map, overlay)
     }
     map.addControl(new ZoomControl(), 'top-left')
     map.addControl(new LocateControl(), 'top-right')

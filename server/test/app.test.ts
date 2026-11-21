@@ -1,19 +1,29 @@
 import assert from 'node:assert/strict'
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import type { AddressInfo } from 'node:net'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { after, before, test } from 'node:test'
 import type { Server } from 'node:http'
 import { buildApp } from '../src/app.ts'
 
 let server: Server
 let base: string
+const dataDir = mkdtempSync(join(tmpdir(), 'corle-test-'))
+const tiles = Buffer.from('0123456789')
 
 before(async () => {
-  server = buildApp().listen(0)
+  mkdirSync(join(dataDir, 'layers'))
+  writeFileSync(join(dataDir, 'layers', 'static.pmtiles'), tiles)
+  server = buildApp({ dataDir }).listen(0)
   await new Promise((resolve) => server.once('listening', resolve))
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
 })
 
-after(() => server.close())
+after(() => {
+  server.close()
+  rmSync(dataDir, { recursive: true, force: true })
+})
 
 test('GET /api/health returns ok', async () => {
   const res = await fetch(`${base}/api/health`)
@@ -27,7 +37,6 @@ const stubs = [
   ['POST', '/api/drawings'],
   ['PATCH', '/api/drawings/1'],
   ['DELETE', '/api/drawings/1'],
-  ['GET', '/layers/seadustusala.geojson'],
   ['POST', '/api/auth/login'],
   ['POST', '/api/auth/logout'],
   ['GET', '/api/auth/me'],
@@ -44,5 +53,22 @@ for (const [method, path] of stubs) {
 
 test('unknown route returns 404', async () => {
   const res = await fetch(`${base}/api/nope`)
+  assert.equal(res.status, 404)
+})
+
+test('GET /layers/static.pmtiles serves the file', async () => {
+  const res = await fetch(`${base}/layers/static.pmtiles`)
+  assert.equal(res.status, 200)
+  assert.deepEqual(Buffer.from(await res.arrayBuffer()), tiles)
+})
+
+test('GET /layers/static.pmtiles supports range requests', async () => {
+  const res = await fetch(`${base}/layers/static.pmtiles`, { headers: { Range: 'bytes=2-5' } })
+  assert.equal(res.status, 206)
+  assert.equal(await res.text(), '2345')
+})
+
+test('missing layer file returns 404', async () => {
+  const res = await fetch(`${base}/layers/nope.pmtiles`)
   assert.equal(res.status, 404)
 })

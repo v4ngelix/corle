@@ -1,10 +1,15 @@
 import express from 'express'
+import { join } from 'node:path'
 import { auth } from './routes/auth.ts'
 import { drawings } from './routes/drawings.ts'
 import { layers } from './routes/layers.ts'
 import { uploads } from './routes/uploads.ts'
 
-export function buildApp() {
+export interface AppOptions {
+  dataDir: string
+}
+
+export function buildApp({ dataDir }: AppOptions) {
   const app = express()
   app.disable('x-powered-by')
 
@@ -14,7 +19,7 @@ export function buildApp() {
   app.use('/api', drawings)
   app.use('/api/auth', auth)
   app.use('/api/uploads', uploads)
-  app.use('/layers', layers)
+  app.use('/layers', layers(join(dataDir, 'layers')))
 
   return app
 }

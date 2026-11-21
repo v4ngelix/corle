@@ -12,6 +12,7 @@ const proxy: Record<string, ProxyOptions> = {
   },
   // Must stay after the ELASA entry: the first matching key wins.
   '/api': { target: 'http://127.0.0.1:3000' },
+  '/layers': { target: 'http://127.0.0.1:3000' },
 }
 
 export default defineConfig({
