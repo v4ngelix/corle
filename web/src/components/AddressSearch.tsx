@@ -102,7 +102,8 @@ export function AddressSearch({ map }: { map: MapLibreMap | null }) {
   }
 
   function select(suggestion: AddressSuggestion) {
-    closeList()
+    cancelPending()
+    resetList()
     setValue(suggestion.label)
     resultLayer?.show(suggestion)
   }
