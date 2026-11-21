@@ -31,5 +31,6 @@ export function saveLayerState(state: LayerState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   } catch {
+    // Storage unavailable (private mode, quota): selection just won't persist.
   }
 }
