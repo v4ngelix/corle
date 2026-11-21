@@ -390,6 +390,7 @@ body,
   position: relative;
   flex: 1 1 480px;
   width: 480px;
+  min-width: 0;
 }
 
 .search-box {
@@ -548,6 +549,25 @@ body,
 @media (max-width: 760px) {
   .map .maplibregl-ctrl-top-right {
     top: calc(var(--control-edge) + var(--control-size) + var(--control-gap));
+  }
+
+  .map-controls-container {
+    right: var(--control-edge);
+    max-width: none;
+  }
+
+  .logo-box {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 0 6px;
+  }
+
+  .logo {
+    max-height: 18px;
+  }
+
+  .search {
+    width: auto;
   }
 }
 
