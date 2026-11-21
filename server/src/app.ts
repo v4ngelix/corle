@@ -25,11 +25,11 @@ export function buildApp({ dataDir, adminPassword, elasa: elasaOptions, webDir }
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true })
   })
-  app.use('/api', drawings(db))
+  app.use('/api', drawings(db, dataDir, sessions))
   app.use('/api/elasa', elasa(elasaOptions))
   app.use('/api/auth', auth(sessions, adminPassword))
   app.use('/api/layers', layerFiles(dataDir, sessions))
-  app.use('/api/uploads', uploads)
+  app.use('/api/uploads', uploads(db, dataDir, sessions))
   app.use('/layers', layers(join(dataDir, 'layers')))
   if (webDir) app.use(express.static(webDir))
 

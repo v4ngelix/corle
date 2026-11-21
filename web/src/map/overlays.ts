@@ -1,4 +1,10 @@
-import type { LayerSpecification, Map as MapLibreMap, SourceSpecification, VectorTileSource } from 'maplibre-gl'
+import type {
+  GeoJSONSource,
+  LayerSpecification,
+  Map as MapLibreMap,
+  SourceSpecification,
+  VectorTileSource,
+} from 'maplibre-gl'
 import { DRAWINGS, type Overlay, OVERLAYS, STATIC_LAYERS, type VectorOverlay } from '../config'
 import { wmsLayer, wmsSource } from './wms'
 
@@ -44,4 +50,9 @@ export function setOverlayVisible(map: MapLibreMap, overlay: Overlay, visible: b
 /** Reloads the static layers after one of their source files was replaced; the query string busts caches. */
 export function reloadStaticLayers(map: MapLibreMap): void {
   map.getSource<VectorTileSource>(STATIC_SOURCE)?.setUrl(`${STATIC_LAYERS.url}?v=${Date.now()}`)
+}
+
+/** Reloads the drawings after one was saved, edited or deleted. */
+export function reloadDrawings(map: MapLibreMap): void {
+  void map.getSource<GeoJSONSource>(DRAWINGS_SOURCE)?.setData(DRAWINGS.url)
 }

@@ -663,3 +663,207 @@ body,
 .cadastre-popup a {
   color: #005aa3;
 }
+
+/* Drawings side panel (logged in): right edge on desktop, bottom half on a phone. */
+:root {
+  --drawings-width: 24rem;
+}
+
+body:has(.drawings-panel) .maplibregl-ctrl-top-right {
+  right: calc(var(--drawings-width) + var(--control-gap));
+}
+
+.drawings-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  width: var(--drawings-width);
+  box-sizing: border-box;
+  border-left: 1px solid #cfd8dc;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  font: 0.875rem/1.3 system-ui, sans-serif;
+  color: #10384f;
+}
+
+@media (max-width: 47.5em) {
+  body:has(.drawings-panel) .maplibregl-ctrl-top-right {
+    right: var(--control-edge);
+  }
+
+  .drawings-panel {
+    top: auto;
+    left: 0;
+    width: auto;
+    height: 55dvh;
+    border-left: 0;
+    border-top: 1px solid #cfd8dc;
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
+}
+
+.drawings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eceff1;
+}
+
+.drawings-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.drawings-close {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: none;
+  color: #78909c;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.drawings-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem 1rem;
+}
+
+.drawings-panel .upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 1.875rem;
+  padding: 0 0.625rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #10384f;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.drawings-panel .upload-button:hover {
+  border-color: #9acd66;
+}
+
+.drawings-panel .upload-button:disabled,
+.drawings-panel .upload-button.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.drawings-panel .drawings-primary {
+  border-color: #9acd66;
+  background: #9acd66;
+}
+
+.drawings-toolbar {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.drawings-filter,
+.drawings-field input {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 0.25rem;
+  font: inherit;
+}
+
+.drawings-filter:focus,
+.drawings-field input:focus {
+  outline: none;
+  border-color: #9acd66;
+}
+
+.drawings-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drawings-list li {
+  padding: 0.5rem 0;
+  border-top: 1px solid #eceff1;
+}
+
+.drawings-item {
+  display: grid;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.drawings-item:hover .upload-name {
+  text-decoration: underline;
+}
+
+.drawings-form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.drawings-form fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.drawings-form legend {
+  padding: 0.25rem 0;
+  font-weight: 600;
+}
+
+.drawings-field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.drawings-location {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+}
+
+.drawings-location label,
+.drawings-layers label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2rem;
+  cursor: pointer;
+}
+
+.drawings-layers label {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+}
+
+.drawings-layers label.is-disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.drawings-layer-name {
+  overflow-wrap: anywhere;
+}
+
+.layer-panel .upload-drawings {
+  width: 100%;
+  margin-top: 0.375rem;
+}

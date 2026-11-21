@@ -19,8 +19,8 @@ function flatten(type: number): number {
   return (type & ~gdal.wkb25DBit) % 1000
 }
 
-async function withDataset<T>(file: string, work: (ds: gdal.Dataset) => Promise<T> | T): Promise<T> {
-  const ds = await gdal.openAsync(file)
+async function withDataset<T>(file: string, work: (ds: gdal.Dataset) => Promise<T> | T, drivers?: string[]): Promise<T> {
+  const ds = await gdal.openAsync(file, 'r', drivers)
   try {
     return await work(ds)
   } finally {
@@ -62,16 +62,39 @@ export async function reprojectTo3301(src: string, dst: string): Promise<void> {
 export interface GeoJsonFeature {
   id: number
   properties: Record<string, unknown>
-  geometry: { type: string; coordinates: unknown } | null
+  geometry: GeoJsonGeometry | null
+}
+
+export type GeoJsonGeometry =
+  | { type: 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon'; coordinates: unknown }
+  | { type: 'GeometryCollection'; geometries: GeoJsonGeometry[] }
+
+/**
+ * Runs `ogr2ogr -f GeoJSON <args>` on `file` in the GDAL thread pool and returns the features.
+ * `drivers` limits which formats `file` may be opened as.
+ */
+export async function translateToGeoJson(file: string, args: string[], drivers?: string[]): Promise<GeoJsonFeature[]> {
+  const mem = `/vsimem/${randomUUID()}.geojson`
+  await withDataset(file, async (ds) => (await gdal.vectorTranslateAsync(mem, ds, ['-f', 'GeoJSON', ...args])).close(), drivers)
+  return (JSON.parse(gdal.vsimem.release(mem).toString('utf8')) as { features: GeoJsonFeature[] }).features
+}
+
+/** Same as `translateToGeoJson`, for GeoJSON held in memory. */
+export async function translateGeoJson(geojson: object, args: string[]): Promise<GeoJsonFeature[]> {
+  const mem = `/vsimem/${randomUUID()}.geojson`
+  gdal.vsimem.set(Buffer.from(JSON.stringify(geojson)), mem)
+  try {
+    return await translateToGeoJson(mem, args)
+  } finally {
+    gdal.vsimem.release(mem)
+  }
 }
 
 /** Features of one layer as GeoJSON in `srs`, ids = source FIDs. `precision` = decimal places to keep. */
 export async function readGeoJson(file: string, layer: string, srs: string, precision?: number): Promise<GeoJsonFeature[]> {
-  const mem = `/vsimem/${randomUUID()}.geojson`
-  const args = ['-f', 'GeoJSON', '-t_srs', srs, '-preserve_fid', layer]
+  const args = ['-t_srs', srs, '-preserve_fid', layer]
   if (precision !== undefined) args.push('-lco', `COORDINATE_PRECISION=${precision}`)
-  await withDataset(file, async (ds) => (await gdal.vectorTranslateAsync(mem, ds, args)).close())
-  return (JSON.parse(gdal.vsimem.release(mem).toString('utf8')) as { features: GeoJsonFeature[] }).features
+  return translateToGeoJson(file, args)
 }
 
 const STATIC_LAYERS = ['seadustusala', '5g', 'mastid']

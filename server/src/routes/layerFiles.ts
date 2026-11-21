@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { requireAuth, type Sessions } from '../auth.ts'
 import gdal from 'gdal-async'
 import { buildStaticLayers, ogrinfo, reprojectTo3301 } from '../gdal.ts'
+import { checkInEstonia, UploadError } from '../validate.ts'
 
 type GeometryFamily = 'line' | 'polygon'
 
@@ -19,11 +20,7 @@ const GEOMETRY_TYPES: Record<GeometryFamily, number[]> = {
 }
 const GEOMETRY_NAMES: Record<GeometryFamily, string> = { line: 'jooned', polygon: 'pinnad' }
 
-const ESTONIA = { minE: 300_000, maxE: 800_000, minN: 6_300_000, maxN: 6_700_000 }
-
 const MAX_UPLOAD = '50mb'
-
-class UploadError extends Error {}
 
 /** "2026-11-21_15-57" in Tallinn time: safe in file names on every OS. */
 function fileTimestamp(date: Date): string {
@@ -55,14 +52,6 @@ async function validate(file: string, geometry: GeometryFamily): Promise<{ needs
   }
   if (!layer.hasCoordinateSystem) throw new UploadError('Failil puudub koordinaatsüsteem.')
   return { needsReprojection: layer.epsg !== 3301 }
-}
-
-function checkInEstonia(extent: [number, number, number, number] | undefined): void {
-  if (!extent) throw new UploadError('Kihi ulatust ei õnnestunud lugeda.')
-  const [minE, minN, maxE, maxN] = extent
-  if (minE < ESTONIA.minE || maxE > ESTONIA.maxE || minN < ESTONIA.minN || maxN > ESTONIA.maxN) {
-    throw new UploadError('Andmed jäävad Eestist välja. Kontrolli koordinaatsüsteemi.')
-  }
 }
 
 /** Download and replace the static layers' source GeoPackages. All routes need a login. */

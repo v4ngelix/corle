@@ -62,6 +62,10 @@ export abstract class PopupControl implements IControl {
   /** Called each time the panel opens. */
   protected onOpen(): void {}
 
+  protected close(): void {
+    if (this.panel) this.setOpen(false)
+  }
+
   /** Rebuilds the panel from panelContent(). */
   protected refresh(): void {
     if (this.panel && this.map) this.panel.replaceChildren(...this.panelContent(this.map))

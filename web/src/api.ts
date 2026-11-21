@@ -54,3 +54,88 @@ export async function uploadLayerFile(id: string, file: File): Promise<void> {
     body: file,
   })
 }
+
+export type DrawingLocation = 'underground' | 'overhead'
+
+export interface Drawing {
+  id: number
+  name: string
+  municipality: string | null
+  settlement: string | null
+  location: DrawingLocation
+  surveyor: string | null
+  surveyedOn: string | null
+  accuracyClass: number | null
+  lengthM: number
+  uploadId: number | null
+  originalFilename: string | null
+  /** [west, south, east, north] */
+  bbox: [number, number, number, number]
+  attrs: Record<string, unknown>
+  createdAt: string
+  updatedAt: string
+}
+
+/** The fields edited in the form. Empty strings are stored as null. */
+export interface DrawingForm {
+  name: string
+  municipality: string
+  settlement: string
+  location: DrawingLocation | ''
+  surveyor: string
+  surveyedOn: string
+}
+
+export interface MultiLineString {
+  type: 'MultiLineString'
+  coordinates: number[][][]
+}
+
+export interface PreviewLayer {
+  name: string
+  lines: number
+  lengthM: number
+  swapped: boolean
+  inEstonia: boolean
+  geometry: MultiLineString
+}
+
+export interface UploadPreview {
+  uploadId: number
+  filename: string
+  layers: PreviewLayer[]
+  ignored: { points: number; polygons: number; other: number }
+}
+
+function sendJson(method: string, body: unknown): RequestInit {
+  return { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+}
+
+export async function listDrawings(): Promise<Drawing[]> {
+  return (await request('/api/drawings')).json()
+}
+
+export async function uploadDxf(file: File): Promise<UploadPreview> {
+  const res = await request(`/api/uploads?filename=${encodeURIComponent(file.name)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/octet-stream' },
+    body: file,
+  })
+  return res.json()
+}
+
+export async function saveDrawing(uploadId: number, layers: string[], form: DrawingForm): Promise<Drawing> {
+  return (await request('/api/drawings', sendJson('POST', { uploadId, layers, ...form }))).json()
+}
+
+export async function updateDrawing(id: number, form: DrawingForm): Promise<Drawing> {
+  return (await request(`/api/drawings/${id}`, sendJson('PATCH', form))).json()
+}
+
+export async function deleteDrawing(id: number): Promise<void> {
+  await request(`/api/drawings/${id}`, { method: 'DELETE' })
+}
+
+export function uploadFileUrl(uploadId: number): string {
+  return `/api/uploads/${uploadId}/file`
+}

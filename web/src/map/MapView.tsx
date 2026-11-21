@@ -40,7 +40,13 @@ function buildLayers(state: LayerState): LayerSpecification[] {
   ]
 }
 
-export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => void }) {
+interface MapViewProps {
+  onReady: (map: MapLibreMap | null) => void
+  onLoginChange: (loggedIn: boolean) => void
+  onOpenDrawings: () => void
+}
+
+export function MapView({ onReady, onLoginChange, onOpenDrawings }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -72,14 +78,17 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
     }
     map.addControl(new ZoomControl(), 'top-left')
     map.addControl(new LocateControl(), 'top-right')
-    map.addControl(new UploadControl(() => reloadStaticLayers(map)), 'top-right')
+    map.addControl(
+      new UploadControl({ onLayerUpdated: () => reloadStaticLayers(map), onLoginChange, onOpenDrawings }),
+      'top-right',
+    )
     map.addControl(new LayerControl(BASEMAPS, OVERLAYS, LAYER_GROUPS, layerState), 'top-right')
     onReady(map)
     return () => {
       onReady(null)
       map.remove()
     }
-  }, [onReady])
+  }, [onReady, onLoginChange, onOpenDrawings])
 
   return <div ref={containerRef} className="map" />
 }

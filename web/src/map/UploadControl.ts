@@ -32,6 +32,15 @@ const TRAY = '<path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>'
 const DOWNLOAD_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true">${TRAY}<path d="M12 4v11m-4-4 4 4 4-4"/></svg>`
 const UPLOAD_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true">${TRAY}<path d="M12 15V4M8 8l4-4 4 4"/></svg>`
 
+const DRAWINGS_ICON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17 9 11l4 4 8-8"/><path d="M15 7h6v6"/></svg>'
+
+export interface UploadControlOptions {
+  onLayerUpdated: () => void
+  onLoginChange: (loggedIn: boolean) => void
+  onOpenDrawings: () => void
+}
+
 const LOCKED_TITLE = 'Logi sisse'
 const UNLOCKED_TITLE = 'Kihtide failid'
 
@@ -46,9 +55,9 @@ function formatTime(iso: string): string {
   return new Date(iso).toLocaleString('et-EE', { dateStyle: 'short', timeStyle: 'short' })
 }
 
-/** Login, then download/upload of the static layers' GeoPackages. */
+/** Login, then download/upload of the static layers' GeoPackages and the way to the drawings panel. */
 export class UploadControl extends PopupControl {
-  private readonly onLayerUpdated: () => void
+  private readonly callbacks: UploadControlOptions
   private loggedIn = false
   private layers: LayerFile[] = []
   private error = ''
@@ -56,9 +65,9 @@ export class UploadControl extends PopupControl {
   private busy = false
   private passwordInput?: HTMLInputElement
 
-  constructor(onLayerUpdated: () => void) {
+  constructor(options: UploadControlOptions) {
     super({ id: 'upload-panel', title: LOCKED_TITLE, icon: LOCKED_ICON })
-    this.onLayerUpdated = onLayerUpdated
+    this.callbacks = options
   }
 
   override onAdd(map: MapLibreMap): HTMLElement {
@@ -110,6 +119,14 @@ export class UploadControl extends PopupControl {
   }
 
   private layerList(): HTMLElement[] {
+    const drawings = el('button', 'upload-button upload-drawings', 'Teostusjoonised')
+    drawings.type = 'button'
+    drawings.insertAdjacentHTML('afterbegin', DRAWINGS_ICON)
+    drawings.addEventListener('click', () => {
+      this.close()
+      this.callbacks.onOpenDrawings()
+    })
+
     const list = el('div', 'upload-list')
     for (const layer of this.layers) {
       const row = el('div', 'upload-row')
@@ -152,7 +169,7 @@ export class UploadControl extends PopupControl {
         .catch(() => {})
         .finally(() => this.leave())
     })
-    return [list, out]
+    return [drawings, list, out]
   }
 
   private async upload(layer: LayerFile, file: File): Promise<void> {
@@ -163,7 +180,7 @@ export class UploadControl extends PopupControl {
     try {
       await uploadLayerFile(layer.id, file)
       this.status = { [layer.id]: { text: '✓ Uuendatud', kind: 'ok' } }
-      this.onLayerUpdated()
+      this.callbacks.onLayerUpdated()
     } catch (err) {
       this.status = { [layer.id]: { text: (err as Error).message, kind: 'error' } }
     }
@@ -187,6 +204,7 @@ export class UploadControl extends PopupControl {
     this.busy = false
     this.error = ''
     this.setButton(FOLDER_ICON, UNLOCKED_TITLE)
+    this.callbacks.onLoginChange(true)
     await this.loadLayers()
   }
 
@@ -197,6 +215,7 @@ export class UploadControl extends PopupControl {
     this.status = {}
     this.error = ''
     this.setButton(LOCKED_ICON, LOCKED_TITLE)
+    this.callbacks.onLoginChange(false)
     this.refresh()
   }
 }

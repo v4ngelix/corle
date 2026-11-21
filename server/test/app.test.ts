@@ -35,22 +35,6 @@ test('GET /api/health returns ok', async () => {
   assert.deepEqual(await res.json(), { ok: true })
 })
 
-const stubs = [
-  ['GET', '/api/drawings'],
-  ['POST', '/api/drawings'],
-  ['PATCH', '/api/drawings/1'],
-  ['DELETE', '/api/drawings/1'],
-  ['POST', '/api/uploads'],
-  ['GET', '/api/uploads/1/file'],
-] as const
-
-for (const [method, path] of stubs) {
-  test(`${method} ${path} returns 501`, async () => {
-    const res = await fetch(`${base}${path}`, { method })
-    assert.equal(res.status, 501)
-  })
-}
-
 test('unknown route returns 404', async () => {
   const res = await fetch(`${base}/api/nope`)
   assert.equal(res.status, 404)

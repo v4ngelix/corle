@@ -8,8 +8,8 @@ export type LineGeometry =
 
 export interface DrawingFields {
   name: string
-  municipality: string
-  settlement: string
+  municipality: string | null
+  settlement: string | null
   location: DrawingLocation
   surveyor: string | null
   surveyedOn: string | null
