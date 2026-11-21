@@ -6,7 +6,6 @@ export interface View {
   zoom: number
 }
 
-// URL hash format: #<zoom>/<lat>/<lng>
 export function loadView(): View {
   const parts = window.location.hash.slice(1).split('/')
   if (parts.length !== 3 || parts.some((p) => p === '' || !Number.isFinite(Number(p)))) return START_VIEW

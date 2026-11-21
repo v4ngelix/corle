@@ -18,7 +18,6 @@ const GEOMETRY_TYPES: Record<GeometryFamily, string[]> = {
 }
 const GEOMETRY_NAMES: Record<GeometryFamily, string> = { line: 'jooned', polygon: 'pinnad' }
 
-// Same box as the drawing upload check (PLAN.md §5), L-EST97 easting/northing.
 const ESTONIA = { minE: 300_000, maxE: 800_000, minN: 6_300_000, maxN: 6_700_000 }
 
 const MAX_UPLOAD = '50mb'
@@ -80,7 +79,6 @@ export function layerFiles(dataDir: string, sessions: Sessions) {
   const sourceFile = (id: string) => join(sourceDir, `${id}.gpkg`)
   const rebuild = () => runScript(REBUILD_SCRIPT, { DATA_DIR: dataDir })
 
-  // One upload at a time, so swaps and tile rebuilds never overlap.
   let queue: Promise<unknown> = Promise.resolve()
   const serialized = <T>(work: () => Promise<T>): Promise<T> => {
     const result = queue.then(work)
@@ -89,7 +87,6 @@ export function layerFiles(dataDir: string, sessions: Sessions) {
   }
 
   async function replace(id: string, geometry: GeometryFamily, body: Buffer): Promise<void> {
-    // Temp files live next to the target so the final rename is atomic (same filesystem).
     const uploaded = join(sourceDir, `.${id}.upload.tmp`)
     const reprojected = join(sourceDir, `.${id}.3301.tmp`)
     try {
@@ -141,7 +138,6 @@ export function layerFiles(dataDir: string, sessions: Sessions) {
     }
     res.set('Cache-Control', 'no-store')
     const { mtime } = await stat(sourceFile(layer.id))
-    // e.g. "Seadustusala_2026-11-21_15-57.gpkg": the last-changed time, so downloads don't overwrite each other.
     res.download(sourceFile(layer.id), `${layer.label}_${fileTimestamp(mtime)}.gpkg`)
   })
 

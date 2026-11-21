@@ -18,7 +18,6 @@ let server: Server
 let base: string
 let cookie: string
 
-// Small shapes in the middle of Estonia (L-EST97) and the same area in WGS84.
 const square = (e: number, n: number, d = 100) => [
   [
     [e, n],

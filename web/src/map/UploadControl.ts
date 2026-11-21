@@ -12,7 +12,6 @@ import { PopupControl } from './PopupControl'
 
 const FOLDER =
   '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>' +
-  // Cut-out so the badge sits on top of the folder outline.
   '<rect x="10" y="9" width="14" height="15" fill="#fff" stroke="none"/>'
 
 const FOLDER_ICON =
@@ -29,7 +28,6 @@ const LOCKED_ICON =
   '<path d="M15 16v-2a2 2 0 0 1 4 0v2"/>' +
   '</svg>'
 
-// Tray with an arrow: down = download, up = upload.
 const TRAY = '<path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>'
 const DOWNLOAD_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true">${TRAY}<path d="M12 4v11m-4-4 4 4 4-4"/></svg>`
 const UPLOAD_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true">${TRAY}<path d="M12 15V4M8 8l4-4 4 4"/></svg>`
@@ -122,7 +120,7 @@ export class UploadControl extends PopupControl {
       const download = el('a', 'upload-button', 'Lae alla')
       download.insertAdjacentHTML('afterbegin', DOWNLOAD_ICON)
       download.href = layerFileUrl(layer.id)
-      download.download = '' // Name comes from the server: layer name + last-changed time.
+      download.download = ''
 
       const pick = el('label', 'upload-button', 'Lae üles')
       pick.insertAdjacentHTML('afterbegin', UPLOAD_ICON)

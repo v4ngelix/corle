@@ -15,7 +15,6 @@ interface InAdsAddress {
   g_boundingbox?: string
 }
 
-// g_boundingbox: "lat,lng lat,lng ..."
 function parseExtent(value: string | undefined): [number, number][] | null {
   if (!value) return null
   const ring = value.trim().split(/\s+/).map((pair) => {
