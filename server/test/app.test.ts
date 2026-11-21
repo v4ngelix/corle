@@ -37,9 +37,6 @@ const stubs = [
   ['POST', '/api/drawings'],
   ['PATCH', '/api/drawings/1'],
   ['DELETE', '/api/drawings/1'],
-  ['POST', '/api/auth/login'],
-  ['POST', '/api/auth/logout'],
-  ['GET', '/api/auth/me'],
   ['POST', '/api/uploads'],
   ['GET', '/api/uploads/1/file'],
 ] as const

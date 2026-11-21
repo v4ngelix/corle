@@ -8,7 +8,7 @@ import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, TILE_LAYERS } from '../config
 import { LayerControl } from './LayerControl'
 import { type LayerState, loadLayerState } from './layerState'
 import { LocateControl } from './LocateControl'
-import { overlayLayers, overlaySources } from './overlays'
+import { overlayLayers, overlaySources, reloadStaticLayers } from './overlays'
 import { UploadControl } from './UploadControl'
 import { loadView, saveView } from './viewHash'
 import { WmsImageUpdater } from './wms'
@@ -69,7 +69,7 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
     }
     map.addControl(new ZoomControl(), 'top-left')
     map.addControl(new LocateControl(), 'top-right')
-    map.addControl(new UploadControl(), 'top-right')
+    map.addControl(new UploadControl(() => reloadStaticLayers(map)), 'top-right')
     map.addControl(new LayerControl(BASEMAPS, OVERLAYS, layerState), 'top-right')
     onReady(map)
     return () => {

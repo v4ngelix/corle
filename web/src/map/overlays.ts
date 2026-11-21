@@ -1,4 +1,4 @@
-import type { LayerSpecification, Map as MapLibreMap, SourceSpecification } from 'maplibre-gl'
+import type { LayerSpecification, Map as MapLibreMap, SourceSpecification, VectorTileSource } from 'maplibre-gl'
 import { type Overlay, OVERLAYS, STATIC_LAYERS } from '../config'
 import { wmsLayer, wmsSource } from './wms'
 
@@ -32,4 +32,9 @@ export function setOverlayVisible(map: MapLibreMap, overlay: Overlay, visible: b
   for (const id of layerIds(overlay)) {
     map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none')
   }
+}
+
+/** Reloads the static layers after one of their source files was replaced; the query string busts caches. */
+export function reloadStaticLayers(map: MapLibreMap): void {
+  map.getSource<VectorTileSource>(STATIC_SOURCE)?.setUrl(`${STATIC_LAYERS.url}?v=${Date.now()}`)
 }

@@ -12,6 +12,7 @@ export abstract class PopupControl implements IControl {
   private container?: HTMLElement
   private button?: HTMLButtonElement
   private panel?: HTMLElement
+  private map?: MapLibreMap
   private open = false
 
   constructor(options: PopupControlOptions) {
@@ -41,6 +42,7 @@ export abstract class PopupControl implements IControl {
     this.container = container
     this.button = button
     this.panel = panel
+    this.map = map
     this.setOpen(false)
 
     document.addEventListener('pointerdown', this.onPointerDown, true)
@@ -52,15 +54,31 @@ export abstract class PopupControl implements IControl {
     document.removeEventListener('pointerdown', this.onPointerDown, true)
     document.removeEventListener('keydown', this.onKeyDown)
     this.container?.remove()
-    this.container = this.button = this.panel = undefined
+    this.container = this.button = this.panel = this.map = undefined
   }
 
   protected abstract panelContent(map: MapLibreMap): HTMLElement[]
+
+  /** Called each time the panel opens. */
+  protected onOpen(): void {}
+
+  /** Rebuilds the panel from panelContent(). */
+  protected refresh(): void {
+    if (this.panel && this.map) this.panel.replaceChildren(...this.panelContent(this.map))
+  }
+
+  protected setButton(icon: string, title: string): void {
+    if (!this.button) return
+    this.button.innerHTML = icon
+    this.button.title = title
+    this.button.setAttribute('aria-label', title)
+  }
 
   private setOpen(open: boolean): void {
     this.open = open
     this.panel!.hidden = !open
     this.button!.setAttribute('aria-expanded', String(open))
+    if (open) this.onOpen()
   }
 
   private readonly onPointerDown = (e: PointerEvent): void => {

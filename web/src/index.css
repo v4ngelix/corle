@@ -104,6 +104,124 @@ body,
   margin: 0;
 }
 
+/* Upload panel: login form and layer file list. */
+.upload-login,
+.upload-list {
+  display: grid;
+  gap: 8px;
+  padding: 6px 0;
+  min-width: 220px;
+}
+
+.upload-login label {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 0;
+  cursor: default;
+}
+
+.upload-login input {
+  padding: 6px 8px;
+  border: 1px solid #cfd8dc;
+  border-radius: 4px;
+  font: inherit;
+}
+
+.upload-login input:focus {
+  outline: none;
+  border-color: #9acd66;
+}
+
+.upload-row + .upload-row {
+  padding-top: 8px;
+  border-top: 1px solid #eceff1;
+}
+
+.upload-name {
+  font-weight: 600;
+}
+
+.upload-meta {
+  font-size: 12px;
+  color: #78909c;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.layer-panel .upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #cfd8dc;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #10384f;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.layer-panel .upload-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.layer-panel .upload-button:hover {
+  border-color: #9acd66;
+}
+
+.layer-panel .upload-button:disabled,
+.layer-panel .upload-button.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.upload-info,
+.upload-error,
+.upload-ok {
+  margin: 4px 0 0;
+  font-size: 12px;
+  white-space: normal;
+}
+
+.upload-error {
+  color: #c62828;
+}
+
+.upload-ok {
+  color: #558b2f;
+}
+
+.upload-info {
+  color: #78909c;
+}
+
+.upload-logout {
+  display: block;
+  margin: 4px 0 6px auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #78909c;
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* Zoom buttons, below the search bar. .map prefix: maplibre-gl.css loads after this file. */
 .map .maplibregl-ctrl-top-left .maplibregl-ctrl-group {
   margin: 56px 0 0 12px;
