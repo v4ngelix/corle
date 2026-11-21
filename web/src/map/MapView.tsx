@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { Protocol } from 'pmtiles'
 import { useEffect, useRef } from 'react'
 import './worker'
-import { BASEMAPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, TILE_LAYERS } from '../config'
+import { BASEMAPS, LAYER_GROUPS, MAX_BOUNDS, MAX_ZOOM, OVERLAYS, TILE_LAYERS } from '../config'
 import { CadastrePopup } from './CadastrePopup'
 import { LayerControl } from './LayerControl'
 import { type LayerState, loadLayerState } from './layerState'
@@ -73,7 +73,7 @@ export function MapView({ onReady }: { onReady: (map: MapLibreMap | null) => voi
     map.addControl(new ZoomControl(), 'top-left')
     map.addControl(new LocateControl(), 'top-right')
     map.addControl(new UploadControl(() => reloadStaticLayers(map)), 'top-right')
-    map.addControl(new LayerControl(BASEMAPS, OVERLAYS, layerState), 'top-right')
+    map.addControl(new LayerControl(BASEMAPS, OVERLAYS, LAYER_GROUPS, layerState), 'top-right')
     onReady(map)
     return () => {
       onReady(null)

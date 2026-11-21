@@ -565,6 +565,45 @@ body,
   padding-left: 16px;
 }
 
+.layer-panel .overlay-list[hidden] {
+  display: none;
+}
+
+.layer-panel .overlay-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.layer-panel .overlay-group-label {
+  font-weight: 600;
+}
+
+.layer-panel .overlay-group-toggle {
+  width: 16px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #78909c;
+  font-size: 0.6rem;
+  cursor: pointer;
+}
+
+.maplibregl-ctrl .layer-panel .overlay-group-toggle:hover {
+  background: none;
+  color: #37474f;
+}
+
+.layer-panel .overlay-group-toggle::before {
+  content: '▼';
+  display: inline-block;
+}
+
+.layer-panel .overlay-group-toggle[aria-expanded='false']::before {
+  transform: rotate(-90deg);
+}
+
 .cadastre-popup .maplibregl-popup-content {
   max-height: 22rem;
   overflow: auto;

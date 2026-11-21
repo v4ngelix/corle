@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
-import type { Basemap, Overlay } from '../config'
+import type { Basemap, LayerGroup, Overlay } from '../config'
 import { type LayerState, saveLayerState } from './layerState'
 import { setOverlayVisible } from './overlays'
 import { PopupControl } from './PopupControl'
@@ -14,13 +14,16 @@ const LAYERS_ICON =
 export class LayerControl extends PopupControl {
   private readonly basemaps: Basemap[]
   private readonly overlays: Overlay[]
+  private readonly groups: LayerGroup[]
   private readonly state: LayerState
 
-  constructor(basemaps: Basemap[], overlays: Overlay[], state: LayerState) {
+  constructor(basemaps: Basemap[], overlays: Overlay[], groups: LayerGroup[], state: LayerState) {
     super({ id: 'layer-panel', title: 'Kihid', icon: LAYERS_ICON })
     this.basemaps = basemaps
     this.overlays = overlays
+    this.groups = groups
     this.state = { basemap: state.basemap, overlays: [...state.overlays] }
+    if (import.meta.env.DEV) checkGroups(overlays, groups)
   }
 
   protected override panelContent(map: MapLibreMap): HTMLElement[] {
@@ -60,30 +63,49 @@ export class LayerControl extends PopupControl {
     list.className = 'overlay-list'
     fieldset.append(root.label, list)
 
-    const setLayer = (i: number, checked: boolean): void => {
-      inputs[i].checked = checked
-      setOverlayVisible(map, this.overlays[i], checked)
-    }
+    const byId = new Map(this.overlays.map((o) => [o.id, o]))
+    const inputs: HTMLInputElement[] = []
+    const groups: { input: HTMLInputElement; children: HTMLInputElement[] }[] = []
 
-    const inputs = this.overlays.map((overlay, i) => {
-      const { label, input } = checkbox(overlay.label)
-      input.value = overlay.id
-      input.checked = this.state.overlays.includes(overlay.id)
-      input.addEventListener('change', () => {
-        setLayer(i, input.checked)
-        setTriState(root.input, inputs)
-        this.saveOverlays(inputs)
-      })
-      list.append(label)
-      return input
-    })
-
-    root.input.addEventListener('change', () => {
-      inputs.forEach((_, i) => setLayer(i, root.input.checked))
+    const setLayers = (targets: HTMLInputElement[], checked: boolean): void => {
+      for (const input of targets) {
+        input.checked = checked
+        setOverlayVisible(map, byId.get(input.value)!, checked)
+      }
+      groups.forEach((g) => setTriState(g.input, g.children))
       setTriState(root.input, inputs)
       this.saveOverlays(inputs)
-    })
+    }
 
+    for (const group of this.groups) {
+      const header = checkbox(group.label)
+      header.label.classList.add('overlay-group-label')
+      const children = document.createElement('div')
+      children.className = 'overlay-list'
+      children.id = `overlay-group-${group.id}`
+
+      const row = document.createElement('div')
+      row.className = 'overlay-group'
+      row.append(header.label, collapseButton(group.label, children))
+      list.append(row, children)
+
+      const childInputs = group.overlays.flatMap((id) => {
+        const overlay = byId.get(id)
+        if (!overlay) return []
+        const { label, input } = checkbox(overlay.label)
+        input.value = overlay.id
+        input.checked = this.state.overlays.includes(overlay.id)
+        input.addEventListener('change', () => setLayers([input], input.checked))
+        children.append(label)
+        return [input]
+      })
+      inputs.push(...childInputs)
+      groups.push({ input: header.input, children: childInputs })
+      header.input.addEventListener('change', () => setLayers(childInputs, header.input.checked))
+      setTriState(header.input, childInputs)
+    }
+
+    root.input.addEventListener('change', () => setLayers(inputs, root.input.checked))
     setTriState(root.input, inputs)
     return fieldset
   }
@@ -109,6 +131,32 @@ function checkbox(text: string): { label: HTMLLabelElement; input: HTMLInputElem
   const label = document.createElement('label')
   label.append(input, text)
   return { label, input }
+}
+
+function collapseButton(groupLabel: string, target: HTMLElement): HTMLButtonElement {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = 'overlay-group-toggle'
+  button.setAttribute('aria-expanded', 'true')
+  button.setAttribute('aria-controls', target.id)
+  button.setAttribute('aria-label', groupLabel)
+  button.addEventListener('click', () => {
+    target.hidden = !target.hidden
+    button.setAttribute('aria-expanded', String(!target.hidden))
+  })
+  return button
+}
+
+/** Warns when an overlay is listed in no group or in several, or a group names an unknown overlay. */
+function checkGroups(overlays: Overlay[], groups: LayerGroup[]): void {
+  const listed = groups.flatMap((g) => g.overlays)
+  for (const o of overlays) {
+    const count = listed.filter((id) => id === o.id).length
+    if (count !== 1) console.warn(`Overlay "${o.id}" is in ${count} layer groups, expected 1`)
+  }
+  for (const id of listed) {
+    if (!overlays.some((o) => o.id === id)) console.warn(`Layer group lists unknown overlay "${id}"`)
+  }
 }
 
 function setTriState(parent: HTMLInputElement, children: HTMLInputElement[]): void {

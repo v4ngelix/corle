@@ -178,6 +178,17 @@ export const OVERLAYS: Overlay[] = [
   },
 ]
 
+export interface LayerGroup {
+  id: string
+  label: string
+  overlays: string[]
+}
+
+export const LAYER_GROUPS: LayerGroup[] = [
+  { id: 'tehnovork', label: 'Tehnovõrk', overlays: ['seadustusala', '5g', 'mastid'] },
+  { id: 'abi', label: 'ABI', overlays: ['ky-omandivorm', 'katastripiirid', 'katastriandmed', 'elasa'] },
+]
+
 export const LOGO = {
   src: '/logo.png',
   href: 'https://corle.ee/',
