@@ -116,7 +116,7 @@ test('400 for a missing param', async () => {
 })
 
 test('upstream HTML error → 502, not cached', async () => {
-  reply = { status: 200, type: 'text/html', body: '<html>error</html>' }
+  reply = { status: 200, type: 'text/html', body: '<html lang="ee">error</html>' }
   const query = params()
   assert.equal((await get(query)).status, 502)
   reply = { status: 200, type: 'image/png', body: png }
