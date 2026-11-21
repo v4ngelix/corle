@@ -19,7 +19,7 @@ function getMapUrl(overlay: WmsOverlay, bbox: string, width: number, height: num
   return `${overlay.url}?${params}&BBOX=${bbox}`
 }
 
-function toMercator([lng, lat]: [number, number]): [number, number] {
+export function toMercator([lng, lat]: [number, number]): [number, number] {
   const x = (EARTH_RADIUS * lng * Math.PI) / 180
   const y = EARTH_RADIUS * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
   return [x, y]
