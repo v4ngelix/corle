@@ -1,3 +1,15 @@
+:root {
+  --control-edge: 12px;
+  --control-size: 40px;
+  --control-gap: 4px;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --control-gap: 10px;
+  }
+}
+
 html,
 body,
 #root {
@@ -12,7 +24,6 @@ body,
 
 .maplibregl-ctrl.layer-control {
   position: relative;
-  margin: 12px 12px 0 0;
   font: 14px/1.2 system-ui, sans-serif;
   color: #10384f;
 }
@@ -222,9 +233,8 @@ body,
   cursor: pointer;
 }
 
-/* Zoom buttons, below the search bar. .map prefix: maplibre-gl.css loads after this file. */
 .map .maplibregl-ctrl-top-left .maplibregl-ctrl-group {
-  margin: 56px 0 0 12px;
+  margin: calc(var(--control-edge) + var(--control-size) + var(--control-gap)) 0 0 var(--control-edge);
   overflow: hidden;
   border: 1px solid #cfd8dc;
   border-radius: 6px;
@@ -270,8 +280,15 @@ body,
 }
 
 .map .maplibregl-ctrl-top-right {
+  top: var(--control-edge);
+  right: var(--control-edge);
   display: flex;
   align-items: flex-start;
+  gap: var(--control-gap);
+}
+
+.map .maplibregl-ctrl-top-right .maplibregl-ctrl {
+  margin: 0;
 }
 
 .maplibregl-ctrl.locate-control {
@@ -327,13 +344,13 @@ body,
 
 .map-controls-container {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: var(--control-edge);
+  left: var(--control-edge);
   z-index: 10;
   display: flex;
   align-items: flex-start;
-  gap: 4px;
-  max-width: calc(100dvw - 24px);
+  gap: var(--control-gap);
+  max-width: calc(100dvw - 2 * var(--control-edge));
   font: 14px/1.4 system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
 }
 
@@ -527,11 +544,9 @@ body,
   cursor: pointer;
 }
 
-/* Keep top-right controls clear of the search bar on narrow screens. */
 @media (max-width: 760px) {
-  /* .map prefix: maplibre-gl.css loads after this file and would win at equal specificity. */
   .map .maplibregl-ctrl-top-right {
-    top: 52px;
+    top: calc(var(--control-edge) + var(--control-size) + var(--control-gap));
   }
 }
 
