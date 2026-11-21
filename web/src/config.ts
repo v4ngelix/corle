@@ -74,13 +74,14 @@ export interface WmsOverlay {
   attribution: string
 }
 
-type StyleKeys = 'type' | 'minzoom' | 'layout' | 'paint'
+type StyleKeys = 'type' | 'minzoom' | 'layout' | 'paint' | 'filter'
 export type VectorStyle = Pick<FillLayerSpecification, StyleKeys> | Pick<LineLayerSpecification, StyleKeys>
 
 export interface VectorOverlay {
   kind: 'vector'
   id: string
   label: string
+  source: 'static' | 'drawings'
   visible: boolean
   styles: VectorStyle[]
 }
@@ -89,6 +90,11 @@ export type Overlay = WmsOverlay | VectorOverlay
 
 export const STATIC_LAYERS = {
   url: `pmtiles://${window.location.origin}/layers/static.pmtiles`,
+  attribution: 'Corle OÜ',
+}
+
+export const DRAWINGS = {
+  url: `${window.location.origin}/api/drawings.geojson`,
   attribution: 'Corle OÜ',
 }
 
@@ -110,6 +116,7 @@ export const OVERLAYS: Overlay[] = [
   {
     kind: 'vector',
     id: 'seadustusala',
+    source: 'static',
     label: 'Seadustusala',
     visible: true,
     styles: [
@@ -123,6 +130,7 @@ export const OVERLAYS: Overlay[] = [
   {
     kind: 'vector',
     id: '5g',
+    source: 'static',
     label: '5G',
     visible: false,
     styles: [
@@ -133,6 +141,7 @@ export const OVERLAYS: Overlay[] = [
   {
     kind: 'vector',
     id: 'mastid',
+    source: 'static',
     label: 'Mastid',
     visible: false,
     styles: [
@@ -151,6 +160,36 @@ export const OVERLAYS: Overlay[] = [
     visible: false,
     tiled: true,
     attribution: 'ELASA',
+  },
+  {
+    kind: 'vector',
+    id: 'teostus-maa-alune',
+    label: 'Teostus Maa-Alune',
+    source: 'drawings',
+    visible: true,
+    styles: [
+      {
+        type: 'line',
+        filter: ['==', ['get', 'location'], 'underground'],
+        layout: ROUND_LINE,
+        paint: { 'line-color': '#7500ff', 'line-width': 2 },
+      },
+    ],
+  },
+  {
+    kind: 'vector',
+    id: 'teostus-ohk',
+    label: 'Teostus ÕHK',
+    source: 'drawings',
+    visible: true,
+    styles: [
+      {
+        type: 'line',
+        filter: ['==', ['get', 'location'], 'overhead'],
+        layout: ROUND_LINE,
+        paint: { 'line-color': '#1b6b80', 'line-width': 2 },
+      },
+    ],
   },
   {
     kind: 'wms',
@@ -185,7 +224,7 @@ export interface LayerGroup {
 }
 
 export const LAYER_GROUPS: LayerGroup[] = [
-  { id: 'tehnovork', label: 'Tehnovõrk', overlays: ['seadustusala', '5g', 'mastid'] },
+  { id: 'tehnovork', label: 'Tehnovõrk', overlays: ['seadustusala', 'teostus-maa-alune', 'teostus-ohk', '5g', 'mastid'] },
   { id: 'abi', label: 'ABI', overlays: ['ky-omandivorm', 'katastripiirid', 'katastriandmed', 'elasa'] },
 ]
 

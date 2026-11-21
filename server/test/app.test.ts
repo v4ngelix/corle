@@ -36,7 +36,6 @@ test('GET /api/health returns ok', async () => {
 })
 
 const stubs = [
-  ['GET', '/api/drawings.geojson'],
   ['GET', '/api/drawings'],
   ['POST', '/api/drawings'],
   ['PATCH', '/api/drawings/1'],

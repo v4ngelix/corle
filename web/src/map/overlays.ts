@@ -1,12 +1,20 @@
 import type { LayerSpecification, Map as MapLibreMap, SourceSpecification, VectorTileSource } from 'maplibre-gl'
-import { type Overlay, OVERLAYS, STATIC_LAYERS } from '../config'
+import { DRAWINGS, type Overlay, OVERLAYS, STATIC_LAYERS, type VectorOverlay } from '../config'
 import { wmsLayer, wmsSource } from './wms'
 
 const STATIC_SOURCE = 'static-layers'
+const DRAWINGS_SOURCE = 'drawings'
 
 export const overlaySources: Record<string, SourceSpecification> = {
   ...Object.fromEntries(OVERLAYS.flatMap((o) => (o.kind === 'wms' ? [[o.id, wmsSource(o)]] : []))),
   [STATIC_SOURCE]: { type: 'vector', url: STATIC_LAYERS.url, attribution: STATIC_LAYERS.attribution },
+  [DRAWINGS_SOURCE]: { type: 'geojson', data: DRAWINGS.url, attribution: DRAWINGS.attribution },
+}
+
+function sourceOf(overlay: VectorOverlay): { source: string; 'source-layer'?: string } {
+  return overlay.source === 'drawings'
+    ? { source: DRAWINGS_SOURCE }
+    : { source: STATIC_SOURCE, 'source-layer': overlay.id }
 }
 
 function layerIds(overlay: Overlay): string[] {
@@ -21,8 +29,7 @@ export function overlayLayers(overlay: Overlay, visible: boolean): LayerSpecific
       ({
         ...style,
         id: ids[i],
-        source: STATIC_SOURCE,
-        'source-layer': overlay.id,
+        ...sourceOf(overlay),
         layout: { ...style.layout, visibility: visible ? 'visible' : 'none' },
       }) as LayerSpecification,
   )

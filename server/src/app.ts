@@ -1,6 +1,7 @@
 import express from 'express'
 import { join } from 'node:path'
 import { Sessions } from './auth.ts'
+import { openDb } from './db.ts'
 import { auth } from './routes/auth.ts'
 import { drawings } from './routes/drawings.ts'
 import { elasa, type ElasaOptions } from './routes/elasa.ts'
@@ -19,11 +20,12 @@ export function buildApp({ dataDir, adminPassword, elasa: elasaOptions, webDir }
   const app = express()
   app.disable('x-powered-by')
   const sessions = new Sessions()
+  const db = openDb(join(dataDir, 'corle.sqlite'))
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true })
   })
-  app.use('/api', drawings)
+  app.use('/api', drawings(db))
   app.use('/api/elasa', elasa(elasaOptions))
   app.use('/api/auth', auth(sessions, adminPassword))
   app.use('/api/layers', layerFiles(dataDir, sessions))

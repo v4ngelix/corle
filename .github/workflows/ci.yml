@@ -4,6 +4,13 @@ on:
   push:
     branches: [main]
 
+env:
+  SSH_HOST: boheemia.ee
+  SSH_USER: virt65914
+  APP_DIR: domeenid/www.boheemia.ee/corle
+  APP_NAME: corle
+  PORT: 3001
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,3 +20,49 @@ jobs:
         run: docker build --target test .
       - name: Build image
         run: docker build --target runtime -t corle:${{ github.sha }} .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency: deploy
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build frontend
+        working-directory: web
+        run: npm ci && npm run build
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Upload files
+        run: |
+          mkdir -p out/web
+          cp -r server scripts out/
+          cp -r web/dist out/web/
+          rm -rf out/server/test out/server/.env
+          rsync -az --delete \
+            --exclude /data \
+            --exclude /server/.env \
+            --exclude /server/node_modules \
+            out/ "$SSH_USER@$SSH_HOST:$APP_DIR/"
+
+      - name: Install and restart
+        run: |
+          ssh "$SSH_USER@$SSH_HOST" "\
+            cd $APP_DIR/server && \
+            mkdir -p ../data && \
+            npm ci --omit=dev && \
+            (pm2 delete $APP_NAME || true) && \
+            PORT=$PORT pm2 start src/index.ts --name=$APP_NAME --interpreter=node --node-args='--env-file-if-exists=.env' && \
+            pm2 save"
