@@ -216,6 +216,23 @@ describe('drawings', () => {
     assert.ok((await publicIds()).includes(drawing.id))
   })
 
+  test('save refuses a drawing whose name and location already exist', async () => {
+    const dup = await preview()
+    const res = await json('POST', '/api/drawings', { ...fields, uploadId: dup.uploadId, layers: ['SITRASS'] })
+    assert.equal(res.status, 409)
+    assert.equal(((await res.json()) as { error: string }).error, 'Antud nimega fail on juba lisatud.')
+  })
+
+  test('save allows the same name in the other location', async () => {
+    const up = await preview()
+    const res = await json('POST', '/api/drawings', { ...fields, uploadId: up.uploadId, layers: ['SITRASS'], location: 'overhead' })
+    assert.equal(res.status, 201, await res.clone().text())
+    const created = (await res.json()) as Drawing
+    assert.equal(created.name, 'Kolkja_CO3350')
+    assert.equal(created.location, 'overhead')
+    assert.equal((await fetch(`${base}/api/drawings/${created.id}`, { method: 'DELETE', headers: auth() })).status, 204)
+  })
+
   test('the same upload cannot be saved twice', async () => {
     assert.equal((await json('POST', '/api/drawings', { ...fields, uploadId, layers: ['SITRASS'] })).status, 409)
   })

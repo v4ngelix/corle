@@ -7,6 +7,7 @@ import {
   deleteDrawing,
   deleteUpload,
   type DrawingEdit,
+  drawingNameExists,
   drawingsGeoJson,
   getDrawing,
   getUpload,
@@ -88,6 +89,10 @@ export function drawings(db: DatabaseSync, dataDir: string, sessions: Sessions) 
       }
       if (uploadHasDrawing(db, upload.id)) {
         res.status(409).json({ error: 'See fail on juba salvestatud.' })
+        return
+      }
+      if (drawingNameExists(db, edit.name!, edit.location!)) {
+        res.status(409).json({ error: 'Antud nimega fail on juba lisatud.' })
         return
       }
       const { lest, wgs, lengthM } = mergeLayers(await readDxf(join(dataDir, upload.storedPath)), layers)

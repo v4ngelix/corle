@@ -136,6 +136,11 @@ export function uploadHasDrawing(db: DatabaseSync, uploadId: number): boolean {
   return db.prepare('SELECT 1 FROM drawings WHERE upload_id = ?').get(uploadId) !== undefined
 }
 
+/** A drawing with the same name may exist in the other location (underground/overhead pair). */
+export function drawingNameExists(db: DatabaseSync, name: string, location: DrawingLocation): boolean {
+  return db.prepare('SELECT 1 FROM drawings WHERE name = ? COLLATE NOCASE AND location = ?').get(name, location) !== undefined
+}
+
 /** Uploads older than `before` that never became a drawing: previews nobody saved. */
 export function abandonedUploads(db: DatabaseSync, before: Date): Upload[] {
   return db
