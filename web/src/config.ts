@@ -145,7 +145,7 @@ export const OVERLAYS: Overlay[] = [
     label: 'Mastid',
     visible: false,
     styles: [
-      { type: 'fill', paint: { 'fill-color': '#de258f' } },
+      { type: 'fill', paint: { 'fill-color': '#de258f', 'fill-opacity': 0.5 } },
       { type: 'line', paint: { 'line-color': '#dc4523', 'line-width': 7 } },
     ],
   },
