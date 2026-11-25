@@ -123,8 +123,9 @@ export const OVERLAYS: Overlay[] = [
       {
         type: 'fill',
         minzoom: 7,
-        paint: { 'fill-color': '#e77148', 'fill-outline-color': '#232323', 'fill-opacity': 0.5 },
+        paint: { 'fill-color': '#e77148', 'fill-opacity': 0.5 },
       },
+      { type: 'line', minzoom: 7, layout: ROUND_LINE, paint: { 'line-color': '#b71c1c', 'line-width': 2 } },
     ],
   },
   {
