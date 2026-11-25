@@ -786,6 +786,39 @@ body:has(.drawings-panel) .maplibregl-ctrl-top-right {
   border-color: #9acd66;
 }
 
+.drawings-date {
+  position: relative;
+  display: flex;
+}
+
+.drawings-date input[type='text'] {
+  width: 100%;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.drawings-date .drawings-date-picker {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.drawings-date-clear {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
 .drawings-list {
   margin: 0;
   padding: 0;

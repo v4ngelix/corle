@@ -13,6 +13,8 @@ import {
 } from '../api'
 import { DxfPreviewLayer } from '../map/DxfPreviewLayer'
 import { reloadDrawings } from '../map/overlays'
+import { formatDate } from '../surveyDate'
+import { SurveyDateField } from './SurveyDateField'
 
 type Mode =
   | { kind: 'list' }
@@ -38,11 +40,6 @@ const numberFormat = new Intl.NumberFormat('et-EE', { maximumFractionDigits: 1 }
 
 function formatLength(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${numberFormat.format(m / 1000)} km`
-}
-
-function formatDate(iso: string): string {
-  const [y, m, d] = iso.split('-')
-  return `${d}.${m}.${y}`
 }
 
 function ignoredText({ points, polygons, other }: UploadPreview['ignored']): string {
@@ -93,7 +90,7 @@ function FormFields({ form, onChange }: { form: DrawingForm; onChange: (form: Dr
         ))}
       </fieldset>
       {field('surveyor', 'Mõõdistaja')}
-      {field('surveyedOn', 'Mõõdistamise kuupäev', { type: 'date' })}
+      <SurveyDateField value={form.surveyedOn} onChange={(surveyedOn) => onChange({ ...form, surveyedOn })} />
     </>
   )
 }
