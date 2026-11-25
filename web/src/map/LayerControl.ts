@@ -2,6 +2,7 @@ import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { Basemap, LayerGroup, Overlay } from '../config'
 import { type LayerState, saveLayerState } from './layerState'
 import { setOverlayVisible } from './overlays'
+import { minzoomOf, zoomToShow } from './overlayZoom'
 import { PopupControl } from './PopupControl'
 
 const LAYERS_ICON =
@@ -75,6 +76,7 @@ export class LayerControl extends PopupControl {
       groups.forEach((g) => setTriState(g.input, g.children))
       setTriState(root.input, inputs)
       this.saveOverlays(inputs)
+      if (checked) this.zoomToVisible(map, targets.map((input) => byId.get(input.value)!))
     }
 
     for (const group of this.groups) {
@@ -93,6 +95,13 @@ export class LayerControl extends PopupControl {
         const overlay = byId.get(id)
         if (!overlay) return []
         const { label, input } = checkbox(overlay.label)
+        const minzoom = minzoomOf(overlay)
+        if (minzoom > 0) {
+          const hint = document.createElement('span')
+          hint.className = 'overlay-zoom-hint'
+          hint.textContent = `al. z${minzoom}`
+          label.append(hint)
+        }
         input.value = overlay.id
         input.checked = this.state.overlays.includes(overlay.id)
         input.addEventListener('change', () => setLayers([input], input.checked))
@@ -117,6 +126,13 @@ export class LayerControl extends PopupControl {
     }
     this.state.basemap = id
     saveLayerState(this.state)
+  }
+
+  private zoomToVisible(map: MapLibreMap, overlays: Overlay[]): void {
+    const zoom = map.getZoom()
+    const needed = overlays.map((overlay) => zoomToShow(overlay, zoom)).filter((z): z is number => z !== null)
+    if (needed.length === 0) return
+    map.easeTo({ zoom: Math.max(...needed), duration: 600 })
   }
 
   private saveOverlays(inputs: HTMLInputElement[]): void {
